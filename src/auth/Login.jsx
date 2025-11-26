@@ -1,7 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 
-export default function LoginPage() {
+export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 via-[#C9A24A]/20 to-white p-6">
       <motion.div
@@ -13,7 +13,7 @@ export default function LoginPage() {
         <div className="text-center mb-8">
           <h1
             className="text-4xl font-extrabold tracking-wide"
-            style={{ color: "#000000" }}
+            style={{ color: "#080808ff" }}
           >
             Welcome Back
           </h1>
