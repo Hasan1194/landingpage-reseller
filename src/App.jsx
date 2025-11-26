@@ -3,7 +3,8 @@ import Login from "./auth/Login";
 
 function App() {
   return (
-    <Dashboard />
+    <Dashboard />,
+    <Login />
   );
 }
 

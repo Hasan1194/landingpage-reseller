@@ -8,7 +8,7 @@ import {
   Sparkles,
 } from "lucide-react";
 
-const Dashboard = () => {
+function Dashboard() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-100 via-[#C9A24A]/10 to-white text-[#080808ff] overflow-hidden">
       {/* Decorative background elements */}
