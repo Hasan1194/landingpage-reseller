@@ -60,7 +60,7 @@ function Login() {
               whileTap={{ scale: 0.97 }}
               type="submit"
               className="w-full py-3 text-lg font-semibold rounded-xl shadow-md"
-              style={{ backgroundColor: "#C9A24A", color: "#000000" }}
+              style={{ backgroundColor: "#C9A24A", color: "#fdfdfdff" }}
             >
               Masuk
             </motion.button>

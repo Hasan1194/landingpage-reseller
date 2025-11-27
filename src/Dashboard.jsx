@@ -7,10 +7,47 @@ import {
   ArrowRight,
   Sparkles,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 function Dashboard() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-100 via-[#C9A24A]/10 to-white text-[#080808ff] overflow-hidden">
+
+      {/* 🔹 Header */}
+      <header className="fixed top-0 left-0 w-full bg-white/70 backdrop-blur-md z-50 shadow-md border-b border-[#C9A24A]/30">
+        <div className="max-w-7xl mx-auto flex justify-between items-center px-6 md:px-16 py-4">
+          <a href="/">
+            <img
+              src="/icon.png"
+              alt="PT Imah Teuweul Indonesia"
+              className="h-12 w-auto hover:opacity-90 transition"
+            />
+          </a>
+
+
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3">
+              <Link
+                to="/login"
+                className="px-5 py-2 text-sm font-semibold rounded-full border-2 border-[#C9A24A] text-[#C9A24A] hover:bg-[#C9A24A]/10 transition-all"
+              >
+                Sign In
+              </Link>
+              
+              <Link
+                to="/signup"
+                className="px-6 py-2 text-sm font-bold rounded-full bg-[#C9A24A] text-white shadow hover:brightness-110 hover:scale-105 transition-all"
+              >
+                Sign Up
+              </Link>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Spacer for header */}
+      <div className="h-24"></div>
+
       {/* Decorative background elements */}
       <div className="fixed top-20 right-10 w-72 h-72 bg-[#C9A24A]/30 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
       <div
@@ -39,7 +76,7 @@ function Dashboard() {
           <div className="flex flex-col sm:flex-row justify-center gap-4 pt-8">
             <a
               href="#produk"
-              className="group px-8 py-4 rounded-full bg-[#C9A24A] text-black shadow-lg font-bold text-lg hover:brightness-110 hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2"
+              className="group px-8 py-4 rounded-full bg-[#C9A24A] text-white shadow-lg font-bold text-lg hover:brightness-110 hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2"
             >
               Lihat Produk
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -139,7 +176,7 @@ function Dashboard() {
 
           <a
             href="https://wa.me/6280000000?text=Halo,%20saya%20ingin%20bergabung%20sebagai%20reseller"
-            className="group inline-flex items-center gap-3 px-10 py-5 rounded-full bg-[#C9A24A] text-black text-lg font-bold shadow-md hover:scale-105 hover:brightness-110 transition-all duration-300"
+            className="group inline-flex items-center gap-3 px-10 py-5 rounded-full bg-[#C9A24A] text-white text-lg font-bold shadow-md hover:scale-105 hover:brightness-110 transition-all duration-300"
           >
             WhatsApp
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
