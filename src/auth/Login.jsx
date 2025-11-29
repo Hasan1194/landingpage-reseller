@@ -1,7 +1,41 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "../firebase/firebaseConfig";
+import { useNavigate } from "react-router-dom";
 
 function Login() {
+  const navigate = useNavigate();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setErrorMsg("");
+
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const uid = userCredential.uid;
+
+      if (userSnap.exists()) {
+        const data = userSnap.data();
+        if (data.role === "admin") navigate("/admin");
+        else navigate("/reseller");
+      } else {
+        setError("Akun tidak ditemukan.");
+      }
+    } catch (error) {
+      setErrorMsg("Akun tidak ditemukan atau password salah.");
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 via-[#C9A24A]/20 to-white p-6">
 
@@ -32,13 +66,15 @@ function Login() {
             </p>
           </div>
 
-          <form className="space-y-6">
+          <form className="space-y-6" onSubmit={handleLogin}>
             <div>
               <label className="block font-semibold mb-1 text-gray-800">
-                Username
+                Email
               </label>
               <input
-                type="text"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 transition"
                 style={{ borderColor: "#C9A24A" }}
               />
@@ -50,11 +86,16 @@ function Login() {
               </label>
               <input
                 type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 transition"
                 style={{ borderColor: "#C9A24A" }}
               />
             </div>
 
+            {errorMsg && (
+              <p className="text-red-500 text-sm">{errorMsg}</p>
+            )}
             <motion.button
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}

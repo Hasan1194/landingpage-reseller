@@ -166,24 +166,6 @@ function Dashboard() {
         </div>
       </section>
 
-      {/* Reseller CTA Section */}
-      <section id="reseller" className="max-w-5xl mx-auto px-6 md:px-16 py-20">
-        <div className="bg-white rounded-3xl p-12 md:p-16 shadow-xl text-center relative overflow-hidden">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">Bergabung Sebagai Reseller</h2>
-          <p className="text-xl text-gray-600 mb-4 max-w-2xl mx-auto">
-            Dapatkan keuntungan + poin belanja setiap transaksi
-          </p>
-
-          <a
-            href="https://wa.me/6280000000?text=Halo,%20saya%20ingin%20bergabung%20sebagai%20reseller"
-            className="group inline-flex items-center gap-3 px-10 py-5 rounded-full bg-[#C9A24A] text-white text-lg font-bold shadow-md hover:scale-105 hover:brightness-110 transition-all duration-300"
-          >
-            WhatsApp
-            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-          </a>
-        </div>
-      </section>
-
       {/* Footer */}
       <footer className="bg-[#080808ff] text-gray-300 py-12 mt-20">
         <div className="max-w-7xl mx-auto px-6 md:px-16 text-center">
