@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { Gift, TrendingUp, Award, ChevronRight, Sparkles } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 export default function ResellerPage() {
-    const totalPoints = 320;
+    const { userData } = useAuth();
+    const totalPoints = userData?.points || 0;
     const targetPoints = 500;
     const progress = (totalPoints / targetPoints) * 100;
     const [selectedReward, setSelectedReward] = useState(null);
@@ -51,7 +53,7 @@ export default function ResellerPage() {
                             alt="profile"
                             className="w-9 h-9 rounded-full border-2 border-white shadow"
                         />
-                        <span className="font-semibold text-[#080808] hidden sm:block">Asep Madu</span>
+                        <span className="font-semibold text-[#080808] hidden sm:block">{userData?.name || "User"}</span>
                     </div>
                 </div>
             </nav>

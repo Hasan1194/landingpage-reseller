@@ -4,12 +4,15 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../firebase/firebaseConfig";
 import { useNavigate } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 function Login() {
   const navigate = useNavigate();
-
+  const { setUserData } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
 
   const handleLogin = async (e) => {
@@ -25,18 +28,24 @@ function Login() {
     if (userSnap.exists()) {
       const data = userSnap.data();
 
-      if (data.role === "admin") {
-        navigate("/admin");
-      } else {
-        navigate("/reseller");
-      }
+      setUserData(data); 
+
+      setTimeout(() => {
+        if (data.role === "admin") {
+          navigate("/admin", { replace: true });
+        } else {
+          navigate("/reseller", { replace: true });
+        }
+      }, 500);
     } else {
       setError("Akun tidak ditemukan.");
     }
+
   } catch (error) {
-    console.log(error);
+    console.log("Login error:", error.code, error.message);
     setError("Email atau password salah.");
   }
+
 };
 
 
@@ -85,17 +94,28 @@ function Login() {
             </div>
 
             <div>
-              <label className="block font-semibold mb-1 text-gray-800">
-                Password
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 transition"
-                style={{ borderColor: "#C9A24A" }}
-              />
-            </div>
+              <label className="block font-semibold mb-1 text-gray-800">Password</label>
+              <div className="relative">
+                  <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 pr-12"
+                  style={{ borderColor: "#C9A24A" }}
+                  />
+                  <button
+                  type="button"
+                  className="absolute right-3 top-3"
+                  onClick={() => setShowPassword(!showPassword)}
+                  >
+                  {showPassword ? (
+                      <EyeOff className="w-5 h-5 text-gray-600" />
+                  ) : (
+                      <Eye className="w-5 h-5 text-gray-600" />
+                  )}
+                  </button>
+              </div>
+          </div>
 
             {error && <p className="text-red-500 text-sm">{error}</p>}
 
@@ -109,6 +129,13 @@ function Login() {
               Masuk
             </motion.button>
           </form>
+
+          <div className="text-center mt-6 text-sm text-gray-600">
+            Belum Punya Akun?{" "}
+            <span className="text-[#C9A24A] font-semibold cursor-pointer" onClick={() => navigate("/signup")}>
+                Daftar disini!
+            </span>
+          </div>
 
           <div className="text-center mt-6 text-sm text-gray-600">
             Lupa password?{" "}
