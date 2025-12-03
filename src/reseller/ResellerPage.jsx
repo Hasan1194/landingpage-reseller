@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Gift, TrendingUp, Award, ChevronRight, Sparkles } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { doc, updateDoc, arrayUnion } from "firebase/firestore";
+import { db } from "../firebase/firebaseConfig";
 
 export default function ResellerPage() {
     const { userData } = useAuth();
@@ -8,6 +10,36 @@ export default function ResellerPage() {
     const targetPoints = 500;
     const progress = (totalPoints / targetPoints) * 100;
     const [selectedReward, setSelectedReward] = useState(null);
+
+    const redeemReward = (reward) => {
+    if (totalPoints < reward.points) return;
+
+    const message = `*PENUKARAN HADIAH RESELLER*
+
+    Halo Admin MaKun! 
+
+    Saya ingin menukar poin dengan hadiah berikut:
+
+    *Detail Reseller:*
+    - Nama: ${userData?.name || "User"}
+    - Total Poin: ${totalPoints} pts
+
+    *Hadiah yang Dipilih:*
+    - ${reward.name}
+    - Poin Dibutuhkan: ${reward.points} pts
+
+    *Sisa Poin Setelah Penukaran:*
+    - ${totalPoints - reward.points} pts
+
+    Mohon konfirmasi penukaran hadiah ini ya, Admin!
+
+    Terima kasih`;
+
+        const encodedMessage = encodeURIComponent(message);
+        const adminPhone = "628157101469";
+
+        window.open(`https://wa.me/${adminPhone}?text=${encodedMessage}`, "_blank");
+    };
 
     const rewards = [
         { id: 1, name: "Tumbler Premium", points: 500, image: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=400&h=400&fit=crop", status: "Hampir!" },
@@ -173,15 +205,16 @@ export default function ResellerPage() {
                                                 <span className="text-green-600 text-sm font-semibold">✓ Bisa ditukar</span>
                                             )}
                                         </div>
-                                        <button 
+                                        <button
                                             className={`w-full py-3 rounded-xl font-semibold transition-all duration-300 ${
                                                 canClaim 
                                                     ? 'bg-gradient-to-r from-[#C9A24A] to-[#B8933D] text-white shadow-lg hover:shadow-xl hover:scale-105 hover:brightness-110' 
                                                     : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                             }`}
+                                            onClick={() => redeemReward(reward)}
                                             disabled={!canClaim}
                                         >
-                                            {canClaim ? 'Tukar Sekarang' : 'Kumpulkan Poin'}
+                                            {canClaim ? 'Konfirmasi via WhatsApp' : 'Kumpulkan Poin'}
                                         </button>
                                     </div>
                                 </div>
