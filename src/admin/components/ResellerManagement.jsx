@@ -1,20 +1,29 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Edit } from "lucide-react";
 import { motion } from "framer-motion";
+import { db } from "../../firebase/firebaseConfig";
+import { collection, getDocs } from "firebase/firestore";
 
 export default function ResellerManagement() {
-    const [resellers, setResellers] = useState([
-        { id: 1, name: "Hasan", email: "hasan@example.com", points: 120 },
-        { id: 2, name: "Rizki", email: "rizki@example.com", points: 80 },
-    ]);
+    const [resellers, setResellers] = useState([]);
 
-    const addPoints = (id) => {
-        setResellers(
-        resellers.map((r) =>
-            r.id === id ? { ...r, points: r.points + 10 } : r
-        )
-        );
-    };
+    useEffect(() => {
+        const fetchResellers = async () => {
+            const usersRef = collection(db, "users");
+            const snapshot = await getDocs(usersRef);
+
+            const data = snapshot.docs
+                .filter((d) => d.data().role === "reseller") // hanya reseller
+                .map((d) => ({
+                    id: d.id,
+                    ...d.data()
+                }));
+
+            setResellers(data);
+        };
+
+        fetchResellers();
+    }, []);
 
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
@@ -38,16 +47,9 @@ export default function ResellerManagement() {
                 <td className="p-3">{user.name}</td>
                 <td className="p-3">{user.email}</td>
                 <td className="p-3">{user.points}</td>
-                <td className="p-3 flex gap-2">
+                <td className="p-3">
                     <button className="px-3 py-1 bg-blue-500 text-white rounded-lg text-sm flex items-center gap-1">
                     <Edit size={14} /> Edit
-                    </button>
-
-                    <button
-                    onClick={() => addPoints(user.id)}
-                    className="px-3 py-1 bg-yellow-500 text-white rounded-lg text-sm"
-                    >
-                    + Poin
                     </button>
                 </td>
                 </tr>

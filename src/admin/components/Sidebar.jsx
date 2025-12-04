@@ -28,6 +28,17 @@ export default function Sidebar({ activePage, setActivePage }) {
             >
             <Gift size={20} /> Kelola Reward
             </button>
+
+            <button
+            onClick={() => setActivePage("redeem")}
+            className={`flex items-center gap-3 p-3 w-full rounded-lg font-medium ${
+                activePage === "redeem"
+                ? "bg-yellow-400 text-white"
+                : "hover:bg-yellow-100"
+            }`}
+            >
+            <Gift size={20} /> Permintaan Redeem
+            </button>
         </nav>
         </aside>
     );
