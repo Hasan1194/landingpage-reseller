@@ -35,11 +35,9 @@ function Register() {
         setIsLoading(true);
 
         try {
-        // 1️⃣ Buat user di Authentication
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        // 2️⃣ Simpan data ke Firestore
         await setDoc(doc(db, "users", user.uid), {
             name: name,
             email: email,
