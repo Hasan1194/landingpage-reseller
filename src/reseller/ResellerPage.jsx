@@ -41,24 +41,26 @@ export default function ResellerPage() {
         window.open(`https://wa.me/${adminPhone}?text=${encodedMessage}`, "_blank");
     };
 
-    const rewards = [
-        { id: 1, name: "Tumbler Premium", points: 500, image: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=400&h=400&fit=crop", status: "Hampir!" },
-        { id: 2, name: "Jaket Exclusive", points: 1200, image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400&h=400&fit=crop", status: "Populer" },
-        { id: 3, name: "Sepeda MTB", points: 6000, image: "https://images.unsplash.com/photo-1576435728678-68d0fbf94e91?w=400&h=400&fit=crop", status: "Premium" },
-        { id: 4, name: "Smartwatch", points: 3000, image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=400&fit=crop", status: "Favorit" },
-        { id: 5, name: "Headphones", points: 1500, image: "https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=400&h=400&fit=crop", status: "Baru" },
-        { id: 6, name: "Voucher Belanja", points: 800, image: "https://images.unsplash.com/photo-1567016542093-1f8e5f5f5f5f?w=400&h=400&fit=crop", status: "Hemat" },
-        { id: 7, name: "Tas Ransel", points: 2000, image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=400&h=400&fit=crop", status: "Keren" },
-        { id: 8, name: "Kamera Instan", points: 4000, image: "https://images.unsplash.com/photo-1519183071298-a2962ccf5f0f?w=400&h=400&fit=crop", status: "Tren" },
-        { id: 9, name: "Speaker Bluetooth", points: 2500, image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&h=400&fit=crop", status: "Hot" },
-        { id: 10, name: "Power Bank", points: 1000, image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=400&h=400&fit=crop", status: "Praktis" },
-        { id: 11, name: "Kacamata Hitam", points: 1800, image: "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=400&h=400&fit=crop", status: "Stylish" },
-        { id: 12, name: "Jam Tangan Fashion", points: 2200, image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop", status: "Elegan" },
-    ];
+    const [rewards, setRewards] = useState([]);
+    React.useEffect(() => {
+        setRewards([
+            { id: 1, name: "Tumbler Premium", points: 500, status: "Tersedia", image: "/rewards/tumbler.png" },
+            { id: 2, name: "Paket Madu Spesial", points: 1000, status: "Tersedia", image: "/rewards/madu_pack.png" },
+            { id: 3, name: "Voucher Belanja Rp 100.000", points: 1500, status: "Tersedia", image: "/rewards/voucher.png" },
+            { id: 4, name: "Smartwatch Fitness Tracker", points: 2500, status: "Tersedia", image: "/rewards/smartwatch.png" },
+            { id: 5, name: "Speaker Bluetooth Premium", points: 3000, status: "Tersedia", image: "/rewards/speaker.png" },
+            { id: 6, name: "E-Money Rp 500.000", points: 5000, status: "Tersedia", image: "/rewards/emoney.png" },
+        ]);
+    }, []);
+    
+    const income = totalPoints * 50000;
+
+    const formatMoney = (value) =>
+    value.toLocaleString("id-ID", { style: "currency", currency: "IDR" });
 
     const stats = [
-        { label: "Penjualan Bulan Ini", value: "47", icon: TrendingUp, color: "bg-blue-500" },
-        { label: "Hadiah Ditukar", value: "3", icon: Gift, color: "bg-purple-500" },
+        { label: "Total Penjualan", value: formatMoney(income), icon: TrendingUp, color: "bg-blue-500" },
+        { label: "Hadiah Ditukar", value: userData?.prize , icon: Gift, color: "bg-purple-500" },
         { label: "Peringkat", value: "#12", icon: Award, color: "bg-[#C9A24A]" },
     ];
 
