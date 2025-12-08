@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Gift, TrendingUp, Award, ChevronRight, Sparkles } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
-import { doc, updateDoc, arrayUnion } from "firebase/firestore";
+import { doc, updateDoc, arrayUnion, collection, getDocs } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 
 export default function ResellerPage() {
@@ -10,30 +10,32 @@ export default function ResellerPage() {
     const targetPoints = 500;
     const progress = (totalPoints / targetPoints) * 100;
     const [selectedReward, setSelectedReward] = useState(null);
+    const [rewards, setRewards] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     const redeemReward = (reward) => {
-    if (totalPoints < reward.points) return;
+        if (totalPoints < reward.points) return;
 
-    const message = `*PENUKARAN HADIAH RESELLER*
+        const message = `*PENUKARAN HADIAH RESELLER*
 
-    Halo Admin MaKun! 
+Halo Admin MaKun! 
 
-    Saya ingin menukar poin dengan hadiah berikut:
+Saya ingin menukar poin dengan hadiah berikut:
 
-    *Detail Reseller:*
-    - Nama: ${userData?.name || "User"}
-    - Total Poin: ${totalPoints} pts
+*Detail Reseller:*
+- Nama: ${userData?.name || "User"}
+- Total Poin: ${totalPoints} pts
 
-    *Hadiah yang Dipilih:*
-    - ${reward.name}
-    - Poin Dibutuhkan: ${reward.points} pts
+*Hadiah yang Dipilih:*
+- ${reward.name}
+- Poin Dibutuhkan: ${reward.points} pts
 
-    *Sisa Poin Setelah Penukaran:*
-    - ${totalPoints - reward.points} pts
+*Sisa Poin Setelah Penukaran:*
+- ${totalPoints - reward.points} pts
 
-    Mohon konfirmasi penukaran hadiah ini ya, Admin!
+Mohon konfirmasi penukaran hadiah ini ya, Admin!
 
-    Terima kasih`;
+Terima kasih`;
 
         const encodedMessage = encodeURIComponent(message);
         const adminPhone = "628157101469";
@@ -41,26 +43,39 @@ export default function ResellerPage() {
         window.open(`https://wa.me/${adminPhone}?text=${encodedMessage}`, "_blank");
     };
 
-    const [rewards, setRewards] = useState([]);
-    React.useEffect(() => {
-        setRewards([
-            { id: 1, name: "Tumbler Premium", points: 500, status: "Tersedia", image: "/rewards/tumbler.png" },
-            { id: 2, name: "Paket Madu Spesial", points: 1000, status: "Tersedia", image: "/rewards/madu_pack.png" },
-            { id: 3, name: "Voucher Belanja Rp 100.000", points: 1500, status: "Tersedia", image: "/rewards/voucher.png" },
-            { id: 4, name: "Smartwatch Fitness Tracker", points: 2500, status: "Tersedia", image: "/rewards/smartwatch.png" },
-            { id: 5, name: "Speaker Bluetooth Premium", points: 3000, status: "Tersedia", image: "/rewards/speaker.png" },
-            { id: 6, name: "E-Money Rp 500.000", points: 5000, status: "Tersedia", image: "/rewards/emoney.png" },
-        ]);
+    useEffect(() => {
+        const fetchRewards = async () => {
+            try {
+                setLoading(true);
+                const rewardsRef = collection(db, "rewards");
+                const snapshot = await getDocs(rewardsRef);
+                
+                const rewardsData = snapshot.docs.map((doc) => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+
+                rewardsData.sort((a, b) => a.points - b.points);
+
+                setRewards(rewardsData);
+            } catch (error) {
+                console.error("Error fetching rewards:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchRewards();
     }, []);
     
     const income = totalPoints * 50000;
 
     const formatMoney = (value) =>
-    value.toLocaleString("id-ID", { style: "currency", currency: "IDR" });
+        value.toLocaleString("id-ID", { style: "currency", currency: "IDR" });
 
     const stats = [
         { label: "Total Penjualan", value: formatMoney(income), icon: TrendingUp, color: "bg-blue-500" },
-        { label: "Hadiah Ditukar", value: userData?.prize , icon: Gift, color: "bg-purple-500" },
+        { label: "Hadiah Ditukar", value: userData?.prize || 0, icon: Gift, color: "bg-purple-500" },
         { label: "Peringkat", value: "#12", icon: Award, color: "bg-[#C9A24A]" },
     ];
 
@@ -72,9 +87,9 @@ export default function ResellerPage() {
                     <div className="flex items-center gap-3">
                         <div>
                             <img
-                            src="/icon.png"
-                            alt="PT Imah Teuweul Indonesia"
-                            className="h-12 w-auto hover:opacity-90 transition"
+                                src="/icon.png"
+                                alt="PT Imah Teuweul Indonesia"
+                                className="h-12 w-auto hover:opacity-90 transition"
                             />
                         </div>
                         <h3 className="text-2xl font-bold bg-gradient-to-r from-[#C9A24A] to-[#B8933D] bg-clip-text text-transparent">
@@ -128,7 +143,7 @@ export default function ResellerPage() {
                                 </div>
                             </div>
                             <p className="text-white/80 text-sm">
-                                🎯 {targetPoints - totalPoints} poin lagi untuk <span className="font-bold text-white">Tumbler Premium</span>
+                                🎯 {targetPoints - totalPoints > 0 ? `${targetPoints - totalPoints} poin lagi untuk` : 'Kamu sudah bisa menukar'} <span className="font-bold text-white">Hadiah Pertama</span>
                             </p>
                         </div>
                     </div>
@@ -163,70 +178,90 @@ export default function ResellerPage() {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {rewards.map((reward) => {
-                            const canClaim = totalPoints >= reward.points;
-                            return (
-                                <div
-                                    key={reward.id}
-                                    className="group relative bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border border-[#C9A24A]/20 cursor-pointer"
-                                    onClick={() => setSelectedReward(reward)}
-                                >
-                                    {/* Status Badge */}
-                                    <div className="absolute top-4 right-4 z-10 bg-[#C9A24A] text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
-                                        {reward.status}
-                                    </div>
+                    {loading ? (
+                        <div className="flex items-center justify-center py-20">
+                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#C9A24A]"></div>
+                        </div>
+                    ) : rewards.length === 0 ? (
+                        <div className="text-center py-20 bg-white rounded-2xl shadow-md">
+                            <Gift className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                            <p className="text-gray-500 text-lg">Belum ada hadiah tersedia</p>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {rewards.map((reward) => {
+                                const canClaim = totalPoints >= reward.points;
+                                return (
+                                    <div
+                                        key={reward.id}
+                                        className="group relative bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border border-[#C9A24A]/20 cursor-pointer"
+                                        onClick={() => setSelectedReward(reward)}
+                                    >
+                                        {/* Status Badge */}
+                                        <div className="absolute top-4 right-4 z-10 bg-[#C9A24A] text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+                                            {reward.status || "Tersedia"}
+                                        </div>
 
-                                    {/* Image Container */}
-                                    <div className="relative h-48 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-50">
-                                        <img
-                                            src={reward.image}
-                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                                            alt={reward.name}
-                                        />
-                                        {!canClaim && (
-                                            <div className="absolute inset-0 bg-[#080808]/40 backdrop-blur-[2px] flex items-center justify-center">
-                                                <div className="text-white text-center">
-                                                    <p className="font-bold text-lg">🔒 Terkunci</p>
-                                                    <p className="text-sm">{reward.points - totalPoints} poin lagi</p>
+                                        {/* Image Container */}
+                                        <div className="relative h-48 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-50">
+                                            <img
+                                                src={reward.image || "/rewards/placeholder.png"}
+                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                                alt={reward.name}
+                                                onError={(e) => {
+                                                    e.target.src = "https://via.placeholder.com/400x300?text=No+Image";
+                                                }}
+                                            />
+                                            {!canClaim && (
+                                                <div className="absolute inset-0 bg-[#080808]/40 backdrop-blur-[2px] flex items-center justify-center">
+                                                    <div className="text-white text-center">
+                                                        <p className="font-bold text-lg">🔒 Terkunci</p>
+                                                        <p className="text-sm">{reward.points - totalPoints} poin lagi</p>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* Content */}
-                                    <div className="p-5">
-                                        <h3 className="font-bold text-lg text-[#080808] mb-2">{reward.name}</h3>
-                                        <div className="flex items-center justify-between mb-4">
-                                            <div className="flex items-center gap-1">
-                                                <Award className="w-5 h-5 text-[#C9A24A]" />
-                                                <span className="text-[#C9A24A] font-bold text-lg">{reward.points}</span>
-                                                <span className="text-gray-500 text-sm">poin</span>
-                                            </div>
-                                            {canClaim && (
-                                                <span className="text-green-600 text-sm font-semibold">✓ Bisa ditukar</span>
                                             )}
                                         </div>
-                                        <button
-                                            className={`w-full py-3 rounded-xl font-semibold transition-all duration-300 ${
-                                                canClaim 
-                                                    ? 'bg-gradient-to-r from-[#C9A24A] to-[#B8933D] text-white shadow-lg hover:shadow-xl hover:scale-105 hover:brightness-110' 
-                                                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                            }`}
-                                            onClick={() => redeemReward(reward)}
-                                            disabled={!canClaim}
-                                        >
-                                            {canClaim ? 'Konfirmasi via WhatsApp' : 'Kumpulkan Poin'}
-                                        </button>
+
+                                        {/* Content */}
+                                        <div className="p-5">
+                                            <h3 className="font-bold text-lg text-[#080808] mb-2">{reward.name}</h3>
+                                            {reward.description && (
+                                                <p className="text-sm text-gray-600 mb-3 line-clamp-2">{reward.description}</p>
+                                            )}
+                                            <div className="flex items-center justify-between mb-4">
+                                                <div className="flex items-center gap-1">
+                                                    <Award className="w-5 h-5 text-[#C9A24A]" />
+                                                    <span className="text-[#C9A24A] font-bold text-lg">{reward.points}</span>
+                                                    <span className="text-gray-500 text-sm">poin</span>
+                                                </div>
+                                                {canClaim && (
+                                                    <span className="text-green-600 text-sm font-semibold">✓ Bisa ditukar</span>
+                                                )}
+                                            </div>
+                                            <button
+                                                className={`w-full py-3 rounded-xl font-semibold transition-all duration-300 ${
+                                                    canClaim 
+                                                        ? 'bg-gradient-to-r from-[#C9A24A] to-[#B8933D] text-white shadow-lg hover:shadow-xl hover:scale-105 hover:brightness-110' 
+                                                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                }`}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    if (canClaim) redeemReward(reward);
+                                                }}
+                                                disabled={!canClaim}
+                                            >
+                                                {canClaim ? 'Konfirmasi via WhatsApp' : 'Kumpulkan Poin'}
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-                            );
-                        })}
-                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
                 </div>
 
                 {/* Tips Card */}
-                <div className="bg-gradient-to-r from-[#C9A24A] to-[#A8832D] p-6 rounded-2xl shadow-xl">
+                {/* <div className="bg-gradient-to-r from-[#C9A24A] to-[#A8832D] p-6 rounded-2xl shadow-xl">
                     <div className="flex items-start gap-4">
                         <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
                             <Sparkles className="w-6 h-6 text-white" />
@@ -238,24 +273,24 @@ export default function ResellerPage() {
                             </p>
                         </div>
                     </div>
-                </div>
+                </div> */}
             </div>
 
             {/* Footer */}
             <footer className="bg-[#080808ff] text-gray-300 py-12 mt-20">
                 <div className="max-w-7xl mx-auto px-6 md:px-16 text-center">
-                <h3 className="text-2xl font-bold mb-2">PT Imah Teuweul Indonesia</h3>
-                <p className="opacity-80 mb-4 text-sm">
-                    Madu Asli Berkualitas dari Kuningan
-                </p>
-                <p className="text-xs opacity-50 mb-2">
-                    © 2025 PT Imah Teuweul Indonesia — All Rights Reserved
-                </p>
+                    <h3 className="text-2xl font-bold mb-2">PT Imah Teuweul Indonesia</h3>
+                    <p className="opacity-80 mb-4 text-sm">
+                        Madu Asli Berkualitas dari Kuningan
+                    </p>
+                    <p className="text-xs opacity-50 mb-2">
+                        © 2025 PT Imah Teuweul Indonesia — All Rights Reserved
+                    </p>
 
-                {/* Designed By */}
-                <p className="text-xs opacity-60 mt-1">
-                    Designed by <span className="font-semibold">LinioDev</span>
-                </p>
+                    {/* Designed By */}
+                    <p className="text-xs opacity-60 mt-1">
+                        Designed by <span className="font-semibold">LinioDev</span>
+                    </p>
                 </div>
             </footer>
         </div>
