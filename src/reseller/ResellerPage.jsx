@@ -50,23 +50,30 @@ Terima kasih`;
     useEffect(() => {
         const fetchTotalPointsHistory = async () => {
             try {
-                const userDocId = userData.id;
+                if (!userData?.id) return;
 
-                const historyRef = collection(db, "users", userDocId, "pointHistory");
+                const historyRef = collection(db, "users", userData.id, "pointHistory");
                 const querySnapshot = await getDocs(historyRef);
 
                 let total = 0;
                 querySnapshot.forEach(doc => {
                     const data = doc.data();
-                    if (data.amount) total += data.amount;
+                    
+                    if (typeof data.amount === "number") {
+                        total += data.amount;
+                    } else if (typeof data.points === "number") {
+                        total += data.points;
+                    }
                 });
 
                 setTotalHistory(total);
+                console.log("TOTAL HISTORY:", total);
+
             } catch (error) {
                 console.error("Error fetching point history:", error);
             }
         };
-
+        
         fetchTotalPointsHistory();
 
         const fetchRewards = async () => {
