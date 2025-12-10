@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { Gift, TrendingUp, Award, ChevronRight, Sparkles } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { Gift, TrendingUp, Award, LogOut, User, Settings, ChevronDown  } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { doc, updateDoc, arrayUnion, collection, getDocs } from "firebase/firestore";
-import { db } from "../firebase/firebaseConfig";
+import { db, auth } from "../firebase/firebaseConfig";
+import { signOut } from "firebase/auth";
 
 export default function ResellerPage() {
     const { userData } = useAuth();
@@ -12,6 +13,9 @@ export default function ResellerPage() {
     const [selectedReward, setSelectedReward] = useState(null);
     const [rewards, setRewards] = useState([]);
     const [loading, setLoading] = useState(true);
+    const dropdownRef = useRef(null);
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [totalHistory, setTotalHistory] = useState(0);
 
     const redeemReward = (reward) => {
         if (totalPoints < reward.points) return;
@@ -44,6 +48,27 @@ Terima kasih`;
     };
 
     useEffect(() => {
+        const fetchTotalPointsHistory = async () => {
+            try {
+                const userDocId = userData.id;
+
+                const historyRef = collection(db, "users", userDocId, "pointHistory");
+                const querySnapshot = await getDocs(historyRef);
+
+                let total = 0;
+                querySnapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.amount) total += data.amount;
+                });
+
+                setTotalHistory(total);
+            } catch (error) {
+                console.error("Error fetching point history:", error);
+            }
+        };
+
+        fetchTotalPointsHistory();
+
         const fetchRewards = async () => {
             try {
                 setLoading(true);
@@ -66,6 +91,15 @@ Terima kasih`;
         };
 
         fetchRewards();
+
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsDropdownOpen(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
     
     const income = totalPoints * 50000;
@@ -78,6 +112,15 @@ Terima kasih`;
         { label: "Hadiah Ditukar", value: userData?.prize || 0, icon: Gift, color: "bg-purple-500" },
         { label: "Peringkat", value: "#12", icon: Award, color: "bg-[#C9A24A]" },
     ];
+
+    const handleLogout = async () => {
+        try {
+            await signOut(auth);
+            navigate("/login", { replace: true });
+        } catch (error) {
+            console.error("Logout error:", error);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-100 via-[#C9A24A]/10 to-white">
@@ -96,13 +139,77 @@ Terima kasih`;
                             MaKun Reseller
                         </h3>
                     </div>
-                    <div className="flex items-center gap-3 bg-gradient-to-r from-[#C9A24A]/20 to-[#B8933D]/20 px-4 py-2 rounded-full">
-                        <img
-                            src="https://api.dicebear.com/7.x/avataaars/svg?seed=AsepMadu"
-                            alt="profile"
-                            className="w-9 h-9 rounded-full border-2 border-white shadow"
-                        />
-                        <span className="font-semibold text-[#080808] hidden sm:block">{userData?.name || "User"}</span>
+                    <div className="relative" ref={dropdownRef}>
+                        <button
+                            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                            className="flex items-center gap-3 bg-gradient-to-r from-[#C9A24A]/20 to-[#B8933D]/20 px-4 py-2 rounded-full hover:from-[#C9A24A]/30 hover:to-[#B8933D]/30 transition-all"
+                        >
+                            <img
+                                src="https://api.dicebear.com/7.x/avataaars/svg?seed=AsepMadu"
+                                alt="profile"
+                                className="w-9 h-9 rounded-full border-2 border-white shadow"
+                            />
+                            <span className="font-semibold text-[#080808] hidden sm:block">
+                                {userData?.name || "User"}
+                            </span>
+                            <ChevronDown 
+                                className={`w-4 h-4 text-[#080808] transition-transform duration-200 ${
+                                    isDropdownOpen ? 'rotate-180' : ''
+                                }`}
+                            />
+                        </button>
+
+                        {/* Dropdown Menu */}
+                        {isDropdownOpen && (
+                            <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-[#C9A24A]/20 py-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                                {/* User Info */}
+                                <div className="px-4 py-3 border-b border-gray-100">
+                                    <p className="font-semibold text-[#080808]">{userData?.name}</p>
+                                    <p className="text-sm text-gray-600">{userData?.email}</p>
+                                    <div className="mt-2 inline-flex items-center gap-1 px-3 py-1 bg-[#C9A24A]/10 rounded-full">
+                                        <Award className="w-4 h-4 text-[#C9A24A]" />
+                                        <span className="text-xs font-semibold text-[#C9A24A]">
+                                            {totalPoints} Poin
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Menu Items */}
+                                <div className="py-2">
+                                    <button
+                                        onClick={() => {
+                                            setIsDropdownOpen(false);
+                                            // Navigate to profile
+                                        }}
+                                        className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors text-left"
+                                    >
+                                        <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                            <User className="w-4 h-4 text-blue-600" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-semibold text-[#080808]">Profil Saya</p>
+                                            <p className="text-xs text-gray-500">Kelola informasi akun</p>
+                                        </div>
+                                    </button>
+                                </div>
+
+                                {/* Logout Button */}
+                                <div className="border-t border-gray-100 pt-2">
+                                    <button
+                                        onClick={handleLogout}
+                                        className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-red-50 transition-colors text-left group"
+                                    >
+                                        <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center group-hover:bg-red-200 transition-colors">
+                                            <LogOut className="w-4 h-4 text-red-600" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-semibold text-red-600">Keluar</p>
+                                            <p className="text-xs text-gray-500">Logout dari akun</p>
+                                        </div>
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </nav>
@@ -123,11 +230,14 @@ Terima kasih`;
                     <div className="relative z-10">
                         <div className="flex items-center gap-2 mb-2">
                             <Award className="w-6 h-6 text-white/90" />
-                            <span className="text-white/90 font-medium">Total Poin Kamu</span>
+                            <span className="text-white/90 font-medium">Total Poin Kamu Saat ini</span>
                         </div>
                         <h2 className="text-6xl font-black text-white mb-1">{totalPoints}</h2>
                         <p className="text-white/80 text-lg">poin terkumpul</p>
-
+                        <p className="text-white/80 text-lg">
+                            Total keseluruhan poin yang pernah kamu dapat:  
+                            <span className="font-bold text-white">{totalHistory}</span>
+                        </p>
                         {/* Animated Progress Bar */}
                         <div className="mt-6 space-y-2">
                             <div className="flex justify-between text-sm text-white/90">
@@ -205,7 +315,7 @@ Terima kasih`;
                                         {/* Image Container */}
                                         <div className="relative h-48 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-50">
                                             <img
-                                                src={reward.image || "/rewards/placeholder.png"}
+                                                src={reward.image || "/icon.png"}
                                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                                 alt={reward.name}
                                                 onError={(e) => {
