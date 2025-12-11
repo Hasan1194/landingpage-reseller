@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Gift, TrendingUp, Award, LogOut, User, Settings, ChevronDown  } from "lucide-react";
+import { Gift, TrendingUp, Award, LogOut, User, ChevronDown  } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { doc, updateDoc, arrayUnion, collection, getDocs } from "firebase/firestore";
 import { db, auth } from "../firebase/firebaseConfig";
