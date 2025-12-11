@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Gift, TrendingUp, Award, LogOut, User, ChevronDown  } from "lucide-react";
+import { Gift, TrendingUp, Award, LogOut, User, ChevronDown } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
-import { doc, updateDoc, arrayUnion, collection, getDocs } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
 import { db, auth } from "../firebase/firebaseConfig";
 import { signOut } from "firebase/auth";
 
@@ -15,7 +15,6 @@ export default function ResellerPage() {
     const [loading, setLoading] = useState(true);
     const dropdownRef = useRef(null);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [totalHistory, setTotalHistory] = useState(0);
 
     const redeemReward = (reward) => {
         if (totalPoints < reward.points) return;
@@ -48,34 +47,6 @@ Terima kasih`;
     };
 
     useEffect(() => {
-        const fetchTotalPointsHistory = async () => {
-            try {
-                if (!userData?.id) return;
-
-                const historyRef = collection(db, "users", userData.id, "pointHistory");
-                const querySnapshot = await getDocs(historyRef);
-
-                let total = 0;
-                querySnapshot.forEach(doc => {
-                    const data = doc.data();
-                    
-                    if (typeof data.amount === "number") {
-                        total += data.amount;
-                    } else if (typeof data.points === "number") {
-                        total += data.points;
-                    }
-                });
-
-                setTotalHistory(total);
-                console.log("TOTAL HISTORY:", total);
-
-            } catch (error) {
-                console.error("Error fetching point history:", error);
-            }
-        };
-        
-        fetchTotalPointsHistory();
-
         const fetchRewards = async () => {
             try {
                 setLoading(true);
@@ -131,32 +102,32 @@ Terima kasih`;
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-100 via-[#C9A24A]/10 to-white">
-            {/* Navbar with glassmorphism */}
+            {/* Navbar with glassmorphism - Responsive */}
             <nav className="sticky top-0 z-50 backdrop-blur-md bg-white/80 border-b border-[#C9A24A]/30 shadow-sm">
-                <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-                    <div className="flex items-center gap-3">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center">
+                    <div className="flex items-center gap-2 sm:gap-3">
                         <div>
                             <img
                                 src="/icon.png"
                                 alt="PT Imah Teuweul Indonesia"
-                                className="h-12 w-auto hover:opacity-90 transition"
+                                className="h-8 sm:h-10 md:h-12 w-auto hover:opacity-90 transition"
                             />
                         </div>
-                        <h3 className="text-2xl font-bold bg-gradient-to-r from-[#C9A24A] to-[#B8933D] bg-clip-text text-transparent">
+                        <h3 className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-[#C9A24A] to-[#B8933D] bg-clip-text text-transparent">
                             MaKun Reseller
                         </h3>
                     </div>
                     <div className="relative" ref={dropdownRef}>
                         <button
                             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                            className="flex items-center gap-3 bg-gradient-to-r from-[#C9A24A]/20 to-[#B8933D]/20 px-4 py-2 rounded-full hover:from-[#C9A24A]/30 hover:to-[#B8933D]/30 transition-all"
+                            className="flex items-center gap-2 sm:gap-3 bg-gradient-to-r from-[#C9A24A]/20 to-[#B8933D]/20 px-2 sm:px-4 py-1.5 sm:py-2 rounded-full hover:from-[#C9A24A]/30 hover:to-[#B8933D]/30 transition-all"
                         >
                             <img
                                 src="https://api.dicebear.com/7.x/avataaars/svg?seed=AsepMadu"
                                 alt="profile"
-                                className="w-9 h-9 rounded-full border-2 border-white shadow"
+                                className="w-7 h-7 sm:w-9 sm:h-9 rounded-full border-2 border-white shadow"
                             />
-                            <span className="font-semibold text-[#080808] hidden sm:block">
+                            <span className="font-semibold text-[#080808] hidden sm:block text-sm md:text-base">
                                 {userData?.name || "User"}
                             </span>
                             <ChevronDown 
@@ -166,15 +137,15 @@ Terima kasih`;
                             />
                         </button>
 
-                        {/* Dropdown Menu */}
+                        {/* Dropdown Menu - Responsive */}
                         {isDropdownOpen && (
-                            <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-[#C9A24A]/20 py-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                            <div className="absolute right-0 mt-2 w-56 sm:w-64 bg-white rounded-2xl shadow-2xl border border-[#C9A24A]/20 py-2 animate-in fade-in slide-in-from-top-2 duration-200">
                                 {/* User Info */}
                                 <div className="px-4 py-3 border-b border-gray-100">
-                                    <p className="font-semibold text-[#080808]">{userData?.name}</p>
-                                    <p className="text-sm text-gray-600">{userData?.email}</p>
+                                    <p className="font-semibold text-[#080808] text-sm sm:text-base truncate">{userData?.name}</p>
+                                    <p className="text-xs sm:text-sm text-gray-600 truncate">{userData?.email}</p>
                                     <div className="mt-2 inline-flex items-center gap-1 px-3 py-1 bg-[#C9A24A]/10 rounded-full">
-                                        <Award className="w-4 h-4 text-[#C9A24A]" />
+                                        <Award className="w-3 h-3 sm:w-4 sm:h-4 text-[#C9A24A]" />
                                         <span className="text-xs font-semibold text-[#C9A24A]">
                                             {totalPoints} Poin
                                         </span>
@@ -186,15 +157,14 @@ Terima kasih`;
                                     <button
                                         onClick={() => {
                                             setIsDropdownOpen(false);
-                                            // Navigate to profile
                                         }}
                                         className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors text-left"
                                     >
-                                        <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                                            <User className="w-4 h-4 text-blue-600" />
+                                        <div className="w-7 h-7 sm:w-8 sm:h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                            <User className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600" />
                                         </div>
                                         <div>
-                                            <p className="text-sm font-semibold text-[#080808]">Profil Saya</p>
+                                            <p className="text-xs sm:text-sm font-semibold text-[#080808]">Profil Saya</p>
                                             <p className="text-xs text-gray-500">Kelola informasi akun</p>
                                         </div>
                                     </button>
@@ -206,11 +176,11 @@ Terima kasih`;
                                         onClick={handleLogout}
                                         className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-red-50 transition-colors text-left group"
                                     >
-                                        <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center group-hover:bg-red-200 transition-colors">
-                                            <LogOut className="w-4 h-4 text-red-600" />
+                                        <div className="w-7 h-7 sm:w-8 sm:h-8 bg-red-100 rounded-lg flex items-center justify-center group-hover:bg-red-200 transition-colors">
+                                            <LogOut className="w-3 h-3 sm:w-4 sm:h-4 text-red-600" />
                                         </div>
                                         <div>
-                                            <p className="text-sm font-semibold text-red-600">Keluar</p>
+                                            <p className="text-xs sm:text-sm font-semibold text-red-600">Keluar</p>
                                             <p className="text-xs text-gray-500">Logout dari akun</p>
                                         </div>
                                     </button>
@@ -221,106 +191,105 @@ Terima kasih`;
                 </div>
             </nav>
 
-            {/* Decorative background elements */}
-            <div className="fixed top-20 right-10 w-72 h-72 bg-[#C9A24A]/30 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
+            {/* Decorative background elements - Hidden on mobile */}
+            <div className="hidden md:block fixed top-20 right-10 w-72 h-72 bg-[#C9A24A]/30 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
             <div
-                className="fixed bottom-20 left-10 w-96 h-96 bg-[#C9A24A]/40 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"
+                className="hidden md:block fixed bottom-20 left-10 w-96 h-96 bg-[#C9A24A]/40 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"
                 style={{ animationDelay: "2s" }}
             ></div>
 
-            <div className="max-w-7xl mx-auto px-6 lg:px-12 py-8 space-y-8 relative">
-                {/* Hero Points Card */}
-                <div className="relative overflow-hidden bg-gradient-to-br from-[#C9A24A] via-[#B8933D] to-[#A8832D] p-8 rounded-3xl shadow-2xl">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32"></div>
-                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full -ml-24 -mb-24"></div>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-4 sm:py-6 lg:py-8 space-y-4 sm:space-y-6 lg:space-y-8 relative">
+                {/* Hero Points Card - Responsive */}
+                <div className="relative overflow-hidden bg-gradient-to-br from-[#C9A24A] via-[#B8933D] to-[#A8832D] p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl shadow-2xl">
+                    <div className="absolute top-0 right-0 w-40 h-40 sm:w-64 sm:h-64 bg-white/10 rounded-full -mr-20 sm:-mr-32 -mt-20 sm:-mt-32"></div>
+                    <div className="absolute bottom-0 left-0 w-32 h-32 sm:w-48 sm:h-48 bg-white/10 rounded-full -ml-16 sm:-ml-24 -mb-16 sm:-mb-24"></div>
                     
                     <div className="relative z-10">
                         <div className="flex items-center gap-2 mb-2">
-                            <Award className="w-6 h-6 text-white/90" />
-                            <span className="text-white/90 font-medium">Total Poin Kamu Saat ini</span>
+                            <Award className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white/90" />
+                            <span className="text-white/90 font-medium text-xs sm:text-sm md:text-base">Total Poin Kamu Saat ini</span>
                         </div>
-                        <h2 className="text-6xl font-black text-white mb-1">{totalPoints}</h2>
-                        <p className="text-white/80 text-lg">poin terkumpul</p>
-                        <p className="text-white/80 text-lg">
-                            Total keseluruhan poin yang pernah kamu dapat:  
-                            <span className="font-bold text-white">{totalHistory}</span>
-                        </p>
+                        <h2 className="text-4xl sm:text-5xl md:text-6xl font-black text-white mb-1">
+                            {totalPoints}<span className="text-white/80 text-sm sm:text-base md:text-lg">pts</span>
+                        </h2>
+                        <p className="text-white/80 text-sm sm:text-base md:text-lg">poin terkumpul</p>
+                        
                         {/* Animated Progress Bar */}
-                        <div className="mt-6 space-y-2">
-                            <div className="flex justify-between text-sm text-white/90">
+                        <div className="mt-4 sm:mt-6 space-y-2">
+                            <div className="flex justify-between text-xs sm:text-sm text-white/90">
                                 <span>Progress ke hadiah pertama</span>
                                 <span className="font-bold">{Math.round(progress)}%</span>
                             </div>
-                            <div className="w-full bg-white/20 rounded-full h-4 overflow-hidden backdrop-blur-sm">
+                            <div className="w-full bg-white/20 rounded-full h-3 sm:h-4 overflow-hidden backdrop-blur-sm">
                                 <div
-                                    className="h-4 bg-gradient-to-r from-white to-white/80 rounded-full shadow-lg transition-all duration-700 ease-out flex items-center justify-end pr-2"
+                                    className="h-3 sm:h-4 bg-gradient-to-r from-white to-white/80 rounded-full shadow-lg transition-all duration-700 ease-out flex items-center justify-end pr-2"
                                     style={{ width: `${progress}%` }}
                                 >
-                                    <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white rounded-full animate-pulse"></div>
                                 </div>
                             </div>
-                            <p className="text-white/80 text-sm">
+                            <p className="text-white/80 text-xs sm:text-sm">
                                 🎯 {targetPoints - totalPoints > 0 ? `${targetPoints - totalPoints} poin lagi untuk` : 'Kamu sudah bisa menukar'} <span className="font-bold text-white">Hadiah Pertama</span>
                             </p>
                         </div>
                     </div>
                 </div>
 
-                {/* Stats Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Stats Grid - Responsive */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                     {stats.map((stat, idx) => (
-                        <div key={idx} className="bg-white p-5 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 border border-[#C9A24A]/20 group cursor-pointer">
+                        <div key={idx} className="bg-white p-4 sm:p-5 rounded-xl sm:rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 border border-[#C9A24A]/20 group cursor-pointer">
                             <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-gray-600 text-sm mb-1">{stat.label}</p>
-                                    <p className="text-3xl font-bold text-[#080808]">{stat.value}</p>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-gray-600 text-xs sm:text-sm mb-1">{stat.label}</p>
+                                    <p className="text-xl sm:text-2xl md:text-3xl font-bold text-[#080808] truncate">{stat.value}</p>
                                 </div>
-                                <div className={`${stat.color} w-12 h-12 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg`}>
-                                    <stat.icon className="w-6 h-6 text-white" />
+                                <div className={`${stat.color} w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg flex-shrink-0 ml-2`}>
+                                    <stat.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                                 </div>
                             </div>
                         </div>
                     ))}
                 </div>
 
-                {/* Rewards Section */}
+                {/* Rewards Section - Responsive */}
                 <div>
-                    <div className="flex items-center justify-between mb-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-2">
                         <div>
-                            <h2 className="text-2xl font-bold text-[#080808] flex items-center gap-2">
-                                <Gift className="w-7 h-7 text-[#C9A24A]" />
+                            <h2 className="text-xl sm:text-2xl font-bold text-[#080808] flex items-center gap-2">
+                                <Gift className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-[#C9A24A]" />
                                 Katalog Hadiah
                             </h2>
-                            <p className="text-gray-600 mt-1">Tukar poin dengan hadiah menarik</p>
+                            <p className="text-gray-600 mt-1 text-sm sm:text-base">Tukar poin dengan hadiah menarik</p>
                         </div>
                     </div>
 
                     {loading ? (
-                        <div className="flex items-center justify-center py-20">
-                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#C9A24A]"></div>
+                        <div className="flex items-center justify-center py-12 sm:py-20">
+                            <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-[#C9A24A]"></div>
                         </div>
                     ) : rewards.length === 0 ? (
-                        <div className="text-center py-20 bg-white rounded-2xl shadow-md">
-                            <Gift className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                            <p className="text-gray-500 text-lg">Belum ada hadiah tersedia</p>
+                        <div className="text-center py-12 sm:py-20 bg-white rounded-2xl shadow-md">
+                            <Gift className="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 mx-auto mb-4" />
+                            <p className="text-gray-500 text-base sm:text-lg">Belum ada hadiah tersedia</p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
                             {rewards.map((reward) => {
                                 const canClaim = totalPoints >= reward.points;
                                 return (
                                     <div
                                         key={reward.id}
-                                        className="group relative bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border border-[#C9A24A]/20 cursor-pointer"
+                                        className="group relative bg-white rounded-xl sm:rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border border-[#C9A24A]/20 cursor-pointer"
                                         onClick={() => setSelectedReward(reward)}
                                     >
                                         {/* Status Badge */}
-                                        <div className="absolute top-4 right-4 z-10 bg-[#C9A24A] text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+                                        <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10 bg-[#C9A24A] text-white text-xs font-bold px-2 py-1 sm:px-3 rounded-full shadow-lg">
                                             {reward.status || "Tersedia"}
                                         </div>
 
                                         {/* Image Container */}
-                                        <div className="relative h-48 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-50">
+                                        <div className="relative h-40 sm:h-44 md:h-48 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-50">
                                             <img
                                                 src={reward.image || "/icon.png"}
                                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
@@ -331,32 +300,32 @@ Terima kasih`;
                                             />
                                             {!canClaim && (
                                                 <div className="absolute inset-0 bg-[#080808]/40 backdrop-blur-[2px] flex items-center justify-center">
-                                                    <div className="text-white text-center">
-                                                        <p className="font-bold text-lg">🔒 Terkunci</p>
-                                                        <p className="text-sm">{reward.points - totalPoints} poin lagi</p>
+                                                    <div className="text-white text-center px-2">
+                                                        <p className="font-bold text-base sm:text-lg">🔒 Terkunci</p>
+                                                        <p className="text-xs sm:text-sm">{reward.points - totalPoints} poin lagi</p>
                                                     </div>
                                                 </div>
                                             )}
                                         </div>
 
                                         {/* Content */}
-                                        <div className="p-5">
-                                            <h3 className="font-bold text-lg text-[#080808] mb-2">{reward.name}</h3>
+                                        <div className="p-4 sm:p-5">
+                                            <h3 className="font-bold text-base sm:text-lg text-[#080808] mb-2 line-clamp-1">{reward.name}</h3>
                                             {reward.description && (
-                                                <p className="text-sm text-gray-600 mb-3 line-clamp-2">{reward.description}</p>
+                                                <p className="text-xs sm:text-sm text-gray-600 mb-3 line-clamp-2">{reward.description}</p>
                                             )}
-                                            <div className="flex items-center justify-between mb-4">
+                                            <div className="flex items-center justify-between mb-3 sm:mb-4">
                                                 <div className="flex items-center gap-1">
-                                                    <Award className="w-5 h-5 text-[#C9A24A]" />
-                                                    <span className="text-[#C9A24A] font-bold text-lg">{reward.points}</span>
-                                                    <span className="text-gray-500 text-sm">poin</span>
+                                                    <Award className="w-4 h-4 sm:w-5 sm:h-5 text-[#C9A24A]" />
+                                                    <span className="text-[#C9A24A] font-bold text-base sm:text-lg">{reward.points}</span>
+                                                    <span className="text-gray-500 text-xs sm:text-sm">poin</span>
                                                 </div>
                                                 {canClaim && (
-                                                    <span className="text-green-600 text-sm font-semibold">✓ Bisa ditukar</span>
+                                                    <span className="text-green-600 text-xs sm:text-sm font-semibold">✓ Bisa ditukar</span>
                                                 )}
                                             </div>
                                             <button
-                                                className={`w-full py-3 rounded-xl font-semibold transition-all duration-300 ${
+                                                className={`w-full py-2.5 sm:py-3 rounded-xl font-semibold transition-all duration-300 text-xs sm:text-sm md:text-base ${
                                                     canClaim 
                                                         ? 'bg-gradient-to-r from-[#C9A24A] to-[#B8933D] text-white shadow-lg hover:shadow-xl hover:scale-105 hover:brightness-110' 
                                                         : 'bg-gray-100 text-gray-400 cursor-not-allowed'
@@ -376,35 +345,18 @@ Terima kasih`;
                         </div>
                     )}
                 </div>
-
-                {/* Tips Card */}
-                {/* <div className="bg-gradient-to-r from-[#C9A24A] to-[#A8832D] p-6 rounded-2xl shadow-xl">
-                    <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                            <Sparkles className="w-6 h-6 text-white" />
-                        </div>
-                        <div>
-                            <h3 className="text-white font-bold text-lg mb-2">💡 Tips Kumpulkan Poin Lebih Cepat!</h3>
-                            <p className="text-white/90 text-sm leading-relaxed">
-                                Ajak 3 teman jadi reseller dan dapatkan bonus 100 poin! Setiap penjualan produk premium juga dapat poin 2x lipat.
-                            </p>
-                        </div>
-                    </div>
-                </div> */}
             </div>
 
-            {/* Footer */}
-            <footer className="bg-[#080808ff] text-gray-300 py-12 mt-20">
-                <div className="max-w-7xl mx-auto px-6 md:px-16 text-center">
-                    <h3 className="text-2xl font-bold mb-2">PT Imah Teuweul Indonesia</h3>
-                    <p className="opacity-80 mb-4 text-sm">
+            {/* Footer - Responsive */}
+            <footer className="bg-[#080808ff] text-gray-300 py-8 sm:py-10 md:py-12 mt-12 sm:mt-16 md:mt-20">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-16 text-center">
+                    <h3 className="text-lg sm:text-xl md:text-2xl font-bold mb-2">PT Imah Teuweul Indonesia</h3>
+                    <p className="opacity-80 mb-3 sm:mb-4 text-xs sm:text-sm">
                         Madu Asli Berkualitas dari Kuningan
                     </p>
                     <p className="text-xs opacity-50 mb-2">
                         © 2025 PT Imah Teuweul Indonesia — All Rights Reserved
                     </p>
-
-                    {/* Designed By */}
                     <p className="text-xs opacity-60 mt-1">
                         Designed by <span className="font-semibold">LinioDev</span>
                     </p>
