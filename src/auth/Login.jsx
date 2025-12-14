@@ -34,7 +34,7 @@ function Login() {
         if (data.role === "admin") {
           navigate("/admin", { replace: true });
         } else {
-          navigate("/reseller", { replace: true });
+          navigate("/resellers", { replace: true });
         }
       }, 500);
     } else {

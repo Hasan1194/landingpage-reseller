@@ -45,7 +45,7 @@ function Register() {
             email: email,
             phonenumber: phonenumber,
             address: address,
-            role: "reseller", 
+            role: "resellers", 
             createdAt: serverTimestamp(),
             points: 0 
         });

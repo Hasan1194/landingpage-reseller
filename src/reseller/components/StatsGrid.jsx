@@ -1,6 +1,6 @@
-import { TrendingUp, Gift, Award } from "lucide-react";
+import { TrendingUp, Gift, Award } from "lucide-react"; 
 
-export default function StatsGrid({ userData, totalPoints }) {
+export default function StatsGrid({ userData, totalPoints, rank }) {
     const income = totalPoints * 50000;
 
     const formatMoney = (value) =>
@@ -21,7 +21,7 @@ export default function StatsGrid({ userData, totalPoints }) {
         },
         {
             label: "Peringkat",
-            value: "#12",
+            value: rank ? `#${rank}` : "-",
             icon: Award,
             color: "bg-[#C9A24A]"
         }

@@ -19,9 +19,9 @@ function App() {
 
         {/* Proteksi Role */}
         <Route
-          path="/reseller"
+          path="/resellers"
           element={
-            <ProtectedRoute role="reseller">
+            <ProtectedRoute role="resellers">
               <ResellerPage />
             </ProtectedRoute>
           }

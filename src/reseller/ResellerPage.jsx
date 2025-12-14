@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import { useAuth } from "../context/AuthContext";
 
@@ -9,12 +9,19 @@ import StatsGrid from "./components/StatsGrid";
 import RewardCatalog from "./components/RewardCatalog";
 import Footer from "./components/Footer";
 
-export default function ResellerPage() {
-    const { userData } = useAuth();
+import { calculateTotalPoint, getUserRank } from "./utils/pointUtils"
 
+export default function ResellerPage() {
+    const { userData, currentUser } = useAuth();
+    const [resellers, setResellers] = useState([]);
+    
     const totalPoints = userData?.points || 0;
     const targetPoints = 500;
     const progress = (totalPoints / targetPoints) * 100;
+
+    const [totalHistory, setTotalHistory] = useState(0);
+    const totalPointsHistory = totalHistory;
+    const rank = getUserRank(resellers, currentUser?.uid)
 
     const [rewards, setRewards] = useState([]);
     const [loadingRewards, setLoadingRewards] = useState(true);
@@ -36,7 +43,77 @@ export default function ResellerPage() {
         };
 
         fetchRewards();
-    }, []);
+
+        const fetchResellers = async () => {
+            try {
+                const q = query(
+                    collection(db, "users"),
+                    where("role", "==", "resellers")
+                );
+
+                const snapshot = await getDocs(q);
+
+                const resellerData = await Promise.all(
+                    snapshot.docs.map(async (docSnap) => {
+                        const userId = docSnap.id;
+                        const user = docSnap.data();
+
+                        const historyRef = collection(
+                            db,
+                            "users",
+                            userId,
+                            "pointHistory"
+                        );
+                        const historySnap = await getDocs(historyRef);
+
+                        const totalHistoryPoint = historySnap.docs.reduce(
+                            (sum, d) => {
+                                const data = d.data();
+                                return data.type === "earn" ? sum + data.amount : sum;
+                            },
+                            0
+                        );
+
+                        return {
+                            id: userId,
+                            ...user,
+                            totalPoints: totalHistoryPoint 
+                        };
+                    })
+                );
+
+                setResellers(resellerData);
+
+            } catch (error) {
+                console.error("Error fetch resellers:", error);
+            }
+        };
+
+        fetchResellers();
+
+        const fetchMyPointHistory = async () => {
+            if (!currentUser) return;
+
+            const ref = collection(
+                db,
+                "users",
+                currentUser.uid,
+                "pointHistory"
+            );
+
+            const snap = await getDocs(ref);
+
+            const total = snap.docs.reduce(
+                (sum, d) => sum + (d.data().amount || 0),
+                0
+            );
+
+            setTotalHistory(total);
+        };
+
+        fetchMyPointHistory();
+
+    }, [ currentUser ]);
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-100 via-[#C9A24A]/10 to-white">
@@ -54,7 +131,11 @@ export default function ResellerPage() {
                     targetPoints={targetPoints}
                 />
 
-                <StatsGrid userData={userData} totalPoints={totalPoints} />
+                <StatsGrid
+                    userData={userData}
+                    totalPoints={totalPoints}
+                    rank={rank}
+                />
 
                 <RewardCatalog
                     rewards={rewards}

@@ -354,7 +354,7 @@ export default function ResellerManagement() {
         const snapshot = await getDocs(usersRef);
 
         const data = snapshot.docs
-        .filter((d) => d.data().role === "reseller")
+        .filter((d) => d.data().role === "resellers")
         .map((d) => ({
             id: d.id,
             ...d.data()
@@ -406,7 +406,7 @@ export default function ResellerManagement() {
         const historyRef = collection(db, "users", user.id, "pointHistory");
         await addDoc(historyRef, {
             amount: diff,
-            type: diff > 0 ? "admin-add" : "admin-remove",
+            type: diff > 0 ? "earn" : "reedem",
             description: editData.description || "Perubahan poin oleh admin",
             timestamp: serverTimestamp()
         });
