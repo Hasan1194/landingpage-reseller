@@ -21,7 +21,7 @@ export default function ResellerManagement() {
 
         try {
             const { jsPDF } = await import('jspdf');
-            await import('jspdf-autotable');
+            const autoTable = (await import('jspdf-autotable')).default;
 
             const doc = new jsPDF('landscape'); 
             
@@ -115,7 +115,7 @@ export default function ResellerManagement() {
                 user.prize || '-'
             ]);
 
-            doc.autoTable({
+            autoTable(doc, {
                 head: [tableColumn],
                 body: tableRows,
                 startY: statsY + boxHeight + 8,
