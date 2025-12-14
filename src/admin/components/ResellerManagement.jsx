@@ -88,13 +88,6 @@ export default function ResellerManagement() {
             doc.setFontSize(16);
             doc.text(avgPoints.toLocaleString('id-ID'), 16 + (boxWidth + spacing) * 2, statsY + 13);
 
-            doc.setFillColor(245, 158, 11); 
-            doc.roundedRect(14 + (boxWidth + spacing) * 3, statsY, boxWidth, boxHeight, 2, 2, 'F');
-            doc.setFontSize(8);
-            doc.text('TOTAL HADIAH DITUKAR', 16 + (boxWidth + spacing) * 3, statsY + 5);
-            doc.setFontSize(16);
-            doc.text(totalPrizes.toString(), 16 + (boxWidth + spacing) * 3, statsY + 13);
-
             const tableColumn = [
                 'No',
                 'Nama',
@@ -165,8 +158,8 @@ export default function ResellerManagement() {
                     doc.text('PT Imah Teuweul Indonesia', 14, pageHeight - 10);
                     doc.text('Kuningan, Jawa Barat', 14, pageHeight - 6);
 
-                    doc.text('www.imahteuweul.com', pageWidth - 14, pageHeight - 10, { align: 'right' });
-                    doc.text('info@imahteuweul.com', pageWidth - 14, pageHeight - 6, { align: 'right' });
+                    doc.text('www.madumakun.com', pageWidth - 14, pageHeight - 10, { align: 'right' });
+                    doc.text('madumakun@gmail.com', pageWidth - 14, pageHeight - 6, { align: 'right' });
                 }
             });
 

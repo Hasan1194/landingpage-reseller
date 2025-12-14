@@ -13,6 +13,8 @@ function Register() {
 
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
+    const [phonenumber, setPhonenumber] = useState("");
+    const [address, setAddress] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
@@ -41,6 +43,8 @@ function Register() {
         await setDoc(doc(db, "users", user.uid), {
             name: name,
             email: email,
+            phonenumber: phonenumber,
+            address: address,
             role: "reseller", 
             createdAt: serverTimestamp(),
             points: 0 
@@ -51,7 +55,7 @@ function Register() {
 
         } catch (err) {
         console.error(err);
-        setError("Registrasi gagal! Email mungkin sudah terdaftar.");
+        setError("Password harus terdiri dari minimal 6 karakter dan email harus valid.");
         }
 
         setIsLoading(false);
@@ -99,13 +103,33 @@ function Register() {
                 </div>
 
                 <div>
-                <label className="block font-semibold mb-1 text-gray-800">Email</label>
-                <input type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2"
-                    style={{ borderColor: "#C9A24A" }}
-                />
+                    <label className="block font-semibold mb-1 text-gray-800">Email</label>
+                    <input type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2"
+                        style={{ borderColor: "#C9A24A" }}
+                    />
+                </div>
+
+                <div>
+                    <label className="block font-semibold mb-1 text-gray-800">No Telepon</label>
+                    <input type="number"
+                        value={phonenumber}
+                        onChange={(e) => setPhonenumber(e.target.value)}
+                        className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2"
+                        style={{ borderColor: "#C9A24A" }}
+                    />
+                </div>
+
+                <div>
+                    <label className="block font-semibold mb-1 text-gray-800">Address</label>
+                    <input type="text"
+                        value={address}
+                        onChange={(e) => setAddress(e.target.value)}
+                        className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2"
+                        style={{ borderColor: "#C9A24A" }}
+                    />
                 </div>
 
                 <div>
