@@ -9,7 +9,7 @@ import StatsGrid from "./components/StatsGrid";
 import RewardCatalog from "./components/RewardCatalog";
 import Footer from "./components/Footer";
 
-import { calculateTotalPoint, getUserRank } from "./utils/pointUtils"
+import { getUserRank } from "./utils/pointUtils"
 
 export default function ResellerPage() {
     const { userData, currentUser } = useAuth();
@@ -19,8 +19,6 @@ export default function ResellerPage() {
     const targetPoints = 500;
     const progress = (totalPoints / targetPoints) * 100;
 
-    const [totalHistory, setTotalHistory] = useState(0);
-    const totalPointsHistory = totalHistory;
     const rank = getUserRank(resellers, currentUser?.uid)
 
     const [rewards, setRewards] = useState([]);
