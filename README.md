@@ -17,6 +17,6 @@ If you are developing a production application, we recommend using TypeScript wi
 
 ## Important Install
 
-npm install lucide-react
-npm install firebase
-npm install jspdf jspdf-autotable
+- npm install lucide-react
+- npm install firebase
+- npm install jspdf jspdf-autotable
