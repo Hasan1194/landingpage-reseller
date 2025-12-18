@@ -1,6 +1,6 @@
 import { TrendingUp, Gift, Award } from "lucide-react"; 
 
-export default function StatsGrid({ userData, totalPoints, rank }) {
+export default function StatsGrid({ userData, totalPoints, rank, openHistory }) {
     const income = totalPoints * 50000;
 
     const formatMoney = (value) =>
@@ -11,13 +11,15 @@ export default function StatsGrid({ userData, totalPoints, rank }) {
             label: "Total Penjualan",
             value: formatMoney(income),
             icon: TrendingUp,
-            color: "bg-blue-500"
+            color: "bg-blue-500",
+            onClick: () => onOpenHistory("earn")
         },
         {
             label: "Hadiah Ditukar",
             value: userData?.prize || 0,
             icon: Gift,
-            color: "bg-purple-500"
+            color: "bg-purple-500",
+            onClick: () => onOpenHistory("redeem")
         },
         {
             label: "Peringkat",
@@ -30,7 +32,10 @@ export default function StatsGrid({ userData, totalPoints, rank }) {
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
             {stats.map((stat, i) => (
-                <div key={i} className="group bg-white p-5 sm:p-6 rounded-xl sm:rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-gray-200 hover:-translate-y-1">
+                <div 
+                key={i}
+                onClick={stat.onClick}
+                className="group bg-white p-5 sm:p-6 rounded-xl sm:rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-gray-200 hover:-translate-y-1">
                     <div className="flex justify-between items-start mb-4">
                         <div className="flex-1 min-w-0">
                             <p className="text-gray-500 text-xs sm:text-sm font-medium mb-2">{stat.label}</p>

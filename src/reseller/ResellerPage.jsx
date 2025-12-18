@@ -24,6 +24,15 @@ export default function ResellerPage() {
     const [rewards, setRewards] = useState([]);
     const [loadingRewards, setLoadingRewards] = useState(true);
 
+    const [pointHistory, setPointHistory] = useState([]);
+    const [showHistoryModal, setShowHistoryModal] = useState(false);
+    const [historyType, setHistoryType] = useState(null);
+
+    const openHistory = (type) => {
+        setHistoryType(type);
+        setShowHistoryModal(true);
+    };
+
     useEffect(() => {
         const fetchRewards = async () => {
             try {
@@ -101,12 +110,12 @@ export default function ResellerPage() {
 
             const snap = await getDocs(ref);
 
-            const total = snap.docs.reduce(
-                (sum, d) => sum + (d.data().amount || 0),
-                0
-            );
+            const history = snap.docs.map(d => ({
+                id: d.id,
+                ...d.data()
+            }));
 
-            setTotalHistory(total);
+            setPointHistory(history);
         };
 
         fetchMyPointHistory();
@@ -133,6 +142,7 @@ export default function ResellerPage() {
                     userData={userData}
                     totalPoints={totalPoints}
                     rank={rank}
+                    onOpenHistory={openHistory}
                 />
 
                 <RewardCatalog
@@ -140,6 +150,14 @@ export default function ResellerPage() {
                     loading={loadingRewards}
                     totalPoints={totalPoints}
                 />
+
+                {showHistoryModal && (
+                    <PointHistoryModal
+                        type={historyType}
+                        data={pointHistory}
+                        onClose={() => setShowHistoryModal(false)}
+                    />
+                )}
             </main>
 
             <Footer />
