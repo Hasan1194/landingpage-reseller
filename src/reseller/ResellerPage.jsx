@@ -6,6 +6,7 @@ import { useAuth } from "../context/AuthContext";
 import Navbar from "./components/Navbar";
 import HeroPoints from "./components/HeroPoints";
 import StatsGrid from "./components/StatsGrid";
+import PointHistoryModal from "./components/PointHistoryModal";
 import RewardCatalog from "./components/RewardCatalog";
 import Footer from "./components/Footer";
 
@@ -31,6 +32,16 @@ export default function ResellerPage() {
     const openHistory = (type) => {
         setHistoryType(type);
         setShowHistoryModal(true);
+    };
+    const [historyFilter, setHistoryFilter] = useState("all");
+
+    const openHistoryModal = (type) => {
+        setHistoryFilter(type);
+        setShowHistoryModal(true);
+    };
+
+    const closeHistoryModal = () => {
+        setShowHistoryModal(false);
     };
 
     useEffect(() => {
@@ -142,7 +153,7 @@ export default function ResellerPage() {
                     userData={userData}
                     totalPoints={totalPoints}
                     rank={rank}
-                    onOpenHistory={openHistory}
+                    onOpenHistory={openHistoryModal}
                 />
 
                 <RewardCatalog

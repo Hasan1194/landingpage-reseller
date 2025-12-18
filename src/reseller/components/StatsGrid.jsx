@@ -1,6 +1,6 @@
-import { TrendingUp, Gift, Award } from "lucide-react"; 
+import { TrendingUp, Gift, Award } from "lucide-react";
 
-export default function StatsGrid({ userData, totalPoints, rank, openHistory }) {
+export default function StatsGrid({ userData, totalPoints, rank, onOpenHistory }) {
     const income = totalPoints * 50000;
 
     const formatMoney = (value) =>

@@ -12,8 +12,6 @@ export const getUserRank = (resellers, userId) => {
         (a, b) => b.totalPoints - a.totalPoints
     );
 
-    console.table(sorted);
-
     const index = sorted.findIndex(r => r.id === userId);
     return index === -1 ? "-" : index + 1;
 };
