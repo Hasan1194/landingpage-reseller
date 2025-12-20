@@ -406,7 +406,7 @@ export default function ResellerManagement() {
         const historyRef = collection(db, "users", user.id, "pointHistory");
         await addDoc(historyRef, {
             amount: diff,
-            type: diff > 0 ? "earn" : "reedem",
+            type: diff > 0 ? "earn" : "redeem",
             description: editData.description || "Perubahan poin oleh admin",
             timestamp: serverTimestamp()
         });

@@ -17,8 +17,6 @@ export default function ResellerPage() {
     const [resellers, setResellers] = useState([]);
     
     const totalPoints = userData?.points || 0;
-    const targetPoints = 500;
-    const progress = (totalPoints / targetPoints) * 100;
 
     const rank = getUserRank(resellers, currentUser?.uid)
 
@@ -29,19 +27,23 @@ export default function ResellerPage() {
     const [showHistoryModal, setShowHistoryModal] = useState(false);
     const [historyType, setHistoryType] = useState(null);
 
-    const openHistory = (type) => {
-        setHistoryType(type);
-        setShowHistoryModal(true);
-    };
-    const [historyFilter, setHistoryFilter] = useState("all");
+    const totalEarnedPoints = pointHistory
+        .filter(h => h.type === "earn")
+        .reduce((sum, h) => sum + (h.amount || 0), 0);
+
+    const nextReward = rewards.find(reward => reward.points > totalPoints);
+    const targetPoints = nextReward ? nextReward.points : (rewards.length > 0 ? rewards[rewards.length - 1].points : 500);
+    
+    const progress = targetPoints > 0 ? (totalPoints / targetPoints) * 100 : 0;
 
     const openHistoryModal = (type) => {
-        setHistoryFilter(type);
+        setHistoryType(type);
         setShowHistoryModal(true);
     };
 
     const closeHistoryModal = () => {
         setShowHistoryModal(false);
+        setHistoryType(null);
     };
 
     useEffect(() => {
@@ -110,23 +112,32 @@ export default function ResellerPage() {
         fetchResellers();
 
         const fetchMyPointHistory = async () => {
-            if (!currentUser) return;
+            if (!currentUser) {
+                return;
+            }
 
-            const ref = collection(
-                db,
-                "users",
-                currentUser.uid,
-                "pointHistory"
-            );
+            try {
+                const ref = collection(
+                    db,
+                    "users",
+                    currentUser.uid,
+                    "pointHistory"
+                );
 
-            const snap = await getDocs(ref);
+                const snap = await getDocs(ref);
+                
+                const history = snap.docs.map(d => {
+                    const data = d.data();
+                    return {
+                        id: d.id,
+                        ...data
+                    };
+                });
 
-            const history = snap.docs.map(d => ({
-                id: d.id,
-                ...d.data()
-            }));
-
-            setPointHistory(history);
+                setPointHistory(history);
+            } catch (error) {
+                console.error("Error fetching point history:", error);
+            }
         };
 
         fetchMyPointHistory();
@@ -144,8 +155,10 @@ export default function ResellerPage() {
                 ></div>
                 <HeroPoints
                     totalPoints={totalPoints}
+                    totalEarnedPoints={totalEarnedPoints}
                     progress={progress}
                     targetPoints={targetPoints}
+                    nextReward={nextReward}
                 />
 
                 <StatsGrid
@@ -165,7 +178,7 @@ export default function ResellerPage() {
                     <PointHistoryModal
                         type={historyType}
                         data={pointHistory}
-                        onClose={() => setShowHistoryModal(false)}
+                        onClose={closeHistoryModal}
                     />
                 )}
             </main>
