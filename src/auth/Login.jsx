@@ -16,37 +16,37 @@ function Login() {
   const [error, setError] = useState("");
 
   const handleLogin = async (e) => {
-  e.preventDefault();
-  setError("");
+    e.preventDefault();
+    setError("");
 
-  try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    const uid = userCredential.user.uid;
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const uid = userCredential.user.uid;
 
-    const userSnap = await getDoc(doc(db, "users", uid));
+      const userSnap = await getDoc(doc(db, "users", uid));
 
-    if (userSnap.exists()) {
-      const data = userSnap.data();
+      if (userSnap.exists()) {
+        const data = userSnap.data();
 
-      setUserData(data); 
+        setUserData(data); 
 
-      setTimeout(() => {
-        if (data.role === "admin") {
-          navigate("/admin", { replace: true });
-        } else {
-          navigate("/resellers", { replace: true });
-        }
-      }, 500);
-    } else {
-      setError("Akun tidak ditemukan.");
+        setTimeout(() => {
+          if (data.role === "admin") {
+            navigate("/admin", { replace: true });
+          } else {
+            navigate("/resellers", { replace: true });
+          }
+        }, 500);
+      } else {
+        setError("Akun tidak ditemukan.");
+      }
+
+    } catch (error) {
+      console.log("Login error:", error.code, error.message);
+      setError("Email atau password salah.");
     }
 
-  } catch (error) {
-    console.log("Login error:", error.code, error.message);
-    setError("Email atau password salah.");
-  }
-
-};
+  };
 
 
   return (
