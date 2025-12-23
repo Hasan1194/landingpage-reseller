@@ -2,7 +2,6 @@ import { useState } from "react";
 import Sidebar from "./components/Sidebar";
 import ResellerManagement from "./components/ResellerManagement";
 import RewardManagement from "./components/RewardManagement";
-import RedeemManagement from "./components/RedeemManagement";
 
 export default function AdminPage() {
     const [activePage, setActivePage] = useState("reseller");
