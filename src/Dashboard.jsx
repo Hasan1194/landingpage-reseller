@@ -83,7 +83,7 @@ function Dashboard() {
             </a>
 
             <a
-              href="#reseller"
+              href="/signup"
               className="px-8 py-4 rounded-full border-2 border-[#C9A24A] text-[#C9A24A] shadow-md font-bold text-lg hover:bg-[#C9A24A]/10 hover:scale-105 transition-all duration-300"
             >
               Gabung Reseller
@@ -94,9 +94,9 @@ function Dashboard() {
         {/* Floating stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-20 max-w-4xl mx-auto">
           {[
-            { icon: Users, label: "Reseller Aktif", value: "500+" },
+            { icon: Users, label: "Reseller Aktif", value: "10+" },
             { icon: Star, label: "Rating Produk", value: "4.9/5" },
-            { icon: Award, label: "Tahun Berpengalaman", value: "10+" },
+            { icon: Award, label: "Tahun Berpengalaman", value: "5+" },
             { icon: TrendingUp, label: "Produk Terjual", value: "50K+" },
           ].map((stat, i) => {
             const IconComponent = stat.icon;
