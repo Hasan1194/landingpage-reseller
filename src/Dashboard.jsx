@@ -135,7 +135,7 @@ function Dashboard() {
             },
             {
               name: "Madu Teuweul",
-              desc: "Rasa asam autentik",
+              desc: "Rasa asam autentik ",
             },
             {
               name: "Madu Habbatussauda",
