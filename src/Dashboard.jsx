@@ -135,7 +135,7 @@ function Dashboard() {
             },
             {
               name: "Madu Teuweul",
-              desc: "Rasa manis autentik khas Kuningan",
+              desc: "Rasa asam autentik",
             },
             {
               name: "Madu Habbatussauda",
