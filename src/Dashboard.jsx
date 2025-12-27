@@ -6,10 +6,18 @@ import {
   TrendingUp,
   ArrowRight,
   Sparkles,
+  ChevronDown,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useState } from "react";
 
 function Dashboard() {
+  const [expandedProduct, setExpandedProduct] = useState(null);
+
+  const toggleDescription = (index) => {
+    setExpandedProduct(expandedProduct === index ? null : index);
+  };
+
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-100 via-[#C9A24A]/10 to-white text-[#080808ff] overflow-hidden">
 
@@ -127,58 +135,77 @@ function Dashboard() {
             {
               name: "Madu Mellifera",
               desc: "Madu yang berasal dari lebah Apis mellifera dan memiliki karakteristik rasa yang lebih manis dengan tekstur yang relative cair. Madu Mellifera menjadi salah satu produk produk yang cocok dikonsumsi sehari-hari dan banyak diminati",
+              shortDesc: "Madu yang berasal dari lebah Apis mellifera dengan rasa manis dan tekstur cair, cocok untuk konsumsi sehari-hari.",
               image: "/melifera.png" 
             },
             {
               name: "Madu Odeng",
               desc: "Madu Odeng merupakan madu khas yang berasal dari lebah hutan dan memiliki cita rasa lebih kuat serta aroma khas. Produk ini banyak dicari karena dipercaya memiliki manfaat yang baik dalam meningkatkan stamina dan kesehatan tubuh",
+              shortDesc: "Madu khas dari lebah hutan dengan cita rasa kuat, baik untuk meningkatkan stamina dan kesehatan tubuh.",
               image: "/odeng.png"
             },
             {
               name: "Madu Teuweul",
               desc: "Madu Teuweul merupakan produk yang digunakan sebagai identitas perusahaan, disamping identitas perusahaan madu teuweul memiliki keunikan tersendiri karena dihasilkan dari lebah lokal dan memiliki proses fermentasi alami yang memberikan rasa dan aroma yang berbeda dari madu yang lainnya. Produk madu teuweul merupakan produk unggulan yang dimiliki oleh PT Imah Teuweul Indonesia karena manfaat yang dimiliki madu ini lebih banyak dibandingkan dengan madu yang lainnya.",
+              shortDesc: "Produk unggulan dengan fermentasi alami dari lebah lokal, memiliki manfaat lebih banyak dibanding madu lainnya.",
               image: "/teweul.png"
             },
             {
               name: "Madu Habbatussauda",
               desc: "Madu Habbatussauda yang ada pada PT Imah Teuweul merupakan hasil kombinasi antara madu murni dengan habbatussauda (jintan hitam), yang diketahui memiliki khasiat dalam meningkatkan sistem kekebalan tubuh, memperbaiki metabolisme, serta mendukung kesehatan secara menyeluruh.",
+              shortDesc: "Kombinasi madu murni dengan habbatussauda untuk meningkatkan sistem kekebalan tubuh dan metabolisme.",
               image: "/habat.png"
             },
           ].map((product, i) => (
             <div
               key={i}
-              className="group relative bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer overflow-hidden"
+              className="group relative bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 overflow-hidden flex flex-col"
             >
-              {/* Image Container */}
-              <div className="relative h-64 overflow-hidden bg-gradient-to-br from-[#C9A24A]/10 to-[#B8933D]/10">
+              {/* Image Container - Fixed Height & Better Styling */}
+              <div className="relative h-72 overflow-hidden bg-gradient-to-br from-[#C9A24A]/10 to-[#B8933D]/10">
                 <img
                   src={product.image}
                   alt={product.name}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-500"
                   onError={(e) => {
                     e.target.style.display = 'none';
                     e.target.parentElement.innerHTML = `
                       <div class="w-full h-full flex items-center justify-center">
-                        <svg class="w-20 h-20 text-[#C9A24A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                        <svg class="w-20 h-20 text-[#C9A24A]" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
                         </svg>
                       </div>
                     `;
                   }}
                 />
-                {/* Overlay gradient */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </div>
 
-              {/* Content */}
-              <div className="p-6">
-                <h3 className="font-bold text-xl mb-2 text-gray-900 group-hover:text-[#C9A24A] transition-colors">
+              {/* Content - Flexible Height */}
+              <div className="p-6 flex flex-col flex-grow">
+                <h3 className="font-bold text-xl mb-3 text-gray-900 group-hover:text-[#C9A24A] transition-colors">
                   {product.name}
                 </h3>
-                <p className="text-gray-600 text-sm leading-relaxed mb-4">
-                  {product.desc}
-                </p>
-
+                
+                {/* Description with Read More */}
+                <div className="mb-4 flex-grow">
+                  <p className="text-gray-600 text-sm leading-relaxed text-justify">
+                    {expandedProduct === i ? product.desc : product.shortDesc}
+                  </p>
+                  
+                  {product.desc.length > product.shortDesc.length && (
+                    <button
+                      onClick={() => toggleDescription(i)}
+                      className="mt-2 text-[#C9A24A] text-xs font-semibold hover:text-[#B8933D] transition-colors flex items-center gap-1"
+                    >
+                      {expandedProduct === i ? "Tutup" : "Selengkapnya"}
+                      <ChevronDown 
+                        className={`w-3 h-3 transition-transform duration-300 ${
+                          expandedProduct === i ? "rotate-180" : ""
+                        }`}
+                      />
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           ))}
