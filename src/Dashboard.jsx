@@ -24,7 +24,6 @@ function Dashboard() {
             />
           </a>
 
-
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-3">
               <Link
@@ -127,40 +126,59 @@ function Dashboard() {
           {[
             {
               name: "Madu Mellifera",
-              desc: "Dari lebah Apis mellifera, kaya antioksidan",
+              desc: "Madu yang berasal dari lebah Apis mellifera dan memiliki karakteristik rasa yang lebih manis dengan tekstur yang relative cair. Madu Mellifera menjadi salah satu produk produk yang cocok dikonsumsi sehari-hari dan banyak diminati",
+              image: "/melifera.png" 
             },
             {
               name: "Madu Odeng",
-              desc: "Madu lokal dengan khasiat alami",
+              desc: "Madu Odeng merupakan madu khas yang berasal dari lebah hutan dan memiliki cita rasa lebih kuat serta aroma khas. Produk ini banyak dicari karena dipercaya memiliki manfaat yang baik dalam meningkatkan stamina dan kesehatan tubuh",
+              image: "/odeng.png"
             },
             {
               name: "Madu Teuweul",
-              desc: "Rasa asam autentik ",
+              desc: "Madu Teuweul merupakan produk yang digunakan sebagai identitas perusahaan, disamping identitas perusahaan madu teuweul memiliki keunikan tersendiri karena dihasilkan dari lebah lokal dan memiliki proses fermentasi alami yang memberikan rasa dan aroma yang berbeda dari madu yang lainnya. Produk madu teuweul merupakan produk unggulan yang dimiliki oleh PT Imah Teuweul Indonesia karena manfaat yang dimiliki madu ini lebih banyak dibandingkan dengan madu yang lainnya.",
+              image: "/teweul.png"
             },
             {
               name: "Madu Habbatussauda",
-              desc: "Perpaduan madu & habbatussauda",
+              desc: "Madu Habbatussauda yang ada pada PT Imah Teuweul merupakan hasil kombinasi antara madu murni dengan habbatussauda (jintan hitam), yang diketahui memiliki khasiat dalam meningkatkan sistem kekebalan tubuh, memperbaiki metabolisme, serta mendukung kesehatan secara menyeluruh.",
+              image: "/habat.png"
             },
-            
           ].map((product, i) => (
             <div
               key={i}
-              className="group relative bg-white p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer"
+              className="group relative bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer overflow-hidden"
             >
-              <div className="relative z-10">
-                <div className="w-16 h-16 bg-[#C9A24A]/25 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <Droplets className="w-8 h-8 text-[#C9A24A]" />
-                </div>
+              {/* Image Container */}
+              <div className="relative h-64 overflow-hidden bg-gradient-to-br from-[#C9A24A]/10 to-[#B8933D]/10">
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.parentElement.innerHTML = `
+                      <div class="w-full h-full flex items-center justify-center">
+                        <svg class="w-20 h-20 text-[#C9A24A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                        </svg>
+                      </div>
+                    `;
+                  }}
+                />
+                {/* Overlay gradient */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              </div>
 
-                <h3 className="font-bold text-2xl mb-3">{product.name}</h3>
-                <p className="text-gray-600 leading-relaxed mb-6">
+              {/* Content */}
+              <div className="p-6">
+                <h3 className="font-bold text-xl mb-2 text-gray-900 group-hover:text-[#C9A24A] transition-colors">
+                  {product.name}
+                </h3>
+                <p className="text-gray-600 text-sm leading-relaxed mb-4">
                   {product.desc}
                 </p>
 
-                <div className="flex items-center text-[#C9A24A] font-semibold group-hover:gap-2 transition-all">
-                  <span>Detail</span>
-                  <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all" />
-                </div>
               </div>
             </div>
           ))}
