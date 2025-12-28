@@ -17,7 +17,6 @@ function App() {
         <Route path="/signup" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
 
-        {/* Proteksi Role */}
         <Route
           path="/resellers"
           element={
