@@ -27,26 +27,21 @@ const ForgotPassword = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-100 via-[#C9A24A]/10 to-white flex items-center justify-center p-4 relative overflow-hidden">
-            {/* Decorative background blobs */}
             <div className="fixed top-20 right-10 w-72 h-72 bg-[#C9A24A]/30 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
             <div
                 className="fixed bottom-20 left-10 w-96 h-96 bg-[#C9A24A]/40 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"
                 style={{ animationDelay: "2s" }}
             ></div>
 
-            {/* Main Card */}
             <div className="w-full max-w-md relative z-10">
 
-                {/* Card Container */}
                 <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-10 border border-[#C9A24A]/20">
-                    {/* Icon Header */}
                     <div className="flex justify-center mb-6">
                         <div className="w-16 h-16 bg-gradient-to-br from-[#C9A24A] to-[#B8933D] rounded-2xl flex items-center justify-center shadow-lg">
                             <Lock className="w-8 h-8 text-white" />
                         </div>
                     </div>
 
-                    {/* Title & Description */}
                     <div className="text-center mb-8">
                         <h2 className="text-3xl font-bold text-[#080808] mb-2">
                             Reset Password
@@ -56,7 +51,6 @@ const ForgotPassword = () => {
                         </p>
                     </div>
 
-                    {/* Success Message */}
                     {message && (
                         <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl flex items-start gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
                             <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
@@ -64,7 +58,6 @@ const ForgotPassword = () => {
                         </div>
                     )}
 
-                    {/* Error Message */}
                     {error && (
                         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
                             <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
@@ -72,9 +65,7 @@ const ForgotPassword = () => {
                         </div>
                     )}
 
-                    {/* Form */}
                     <div className="space-y-6">
-                        {/* Email Input */}
                         <div>
                             <label htmlFor="email" className="block text-sm font-semibold text-[#080808] mb-2">
                                 Email Address
@@ -113,7 +104,6 @@ const ForgotPassword = () => {
                         </button>
                     </div>
 
-                    {/* Footer Info */}
                     <div className="mt-8 pt-6 border-t border-gray-100">
                         <p className="text-center text-sm text-gray-600">
                             Ingat password Anda?{" "}
