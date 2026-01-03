@@ -161,7 +161,6 @@ function Dashboard() {
               key={i}
               className="group relative bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 overflow-hidden flex flex-col"
             >
-              {/* Image Container - Fixed Height & Better Styling */}
               <div className="relative h-72 overflow-hidden bg-gradient-to-br from-[#C9A24A]/10 to-[#B8933D]/10">
                 <img
                   src={product.image}
