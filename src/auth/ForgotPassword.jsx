@@ -2,8 +2,11 @@ import React, { useState } from "react";
 import { Mail, ArrowLeft, CheckCircle, AlertCircle, Lock } from "lucide-react";
 import { sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "../firebase/firebaseConfig";
+import { useNavigate } from "react-router-dom";
 
 const ForgotPassword = () => {
+    const navigate = useNavigate();
+    
     const [email, setEmail] = useState("");
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
@@ -107,12 +110,9 @@ const ForgotPassword = () => {
                     <div className="mt-8 pt-6 border-t border-gray-100">
                         <p className="text-center text-sm text-gray-600">
                             Ingat password Anda?{" "}
-                            <button
-                                onClick={() => window.location.href = '/login'}
-                                className="font-semibold text-[#C9A24A] hover:text-[#B8933D] transition-colors"
-                            >
-                                <span>Login di sini</span>
-                            </button>
+                            <span className="text-[#C9A24A] font-semibold cursor-pointer" onClick={() => navigate("/login")}>
+                                Login disini!
+                            </span>
                         </p>
                     </div>
                 </div>

@@ -194,7 +194,9 @@ function Register() {
 
             <div className="text-center mt-6 text-sm text-gray-600">
                 Sudah punya akun?{" "}
-                <a href="/login" className="text-[#C9A24A] font-semibold">Masuk</a>
+                <span className="text-[#C9A24A] font-semibold cursor-pointer" onClick={() => navigate("/login")}>
+                    Masuk
+                </span>
             </div>
 
             </div>
