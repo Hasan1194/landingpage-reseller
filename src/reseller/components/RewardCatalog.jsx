@@ -58,13 +58,13 @@ Mohon diproses. Terima kasih!`;
                     <p className="text-sm sm:text-base text-gray-600">
                         Tukarkan poin Anda dengan hadiah menarik
                     </p>
-                </div>
-                {/* Informasi kebijakan poin & hadiah */}
-                <div className="mt-10 p-4 sm:p-5 bg-yellow-50 border border-yellow-200 rounded-xl">
-                    <p className="text-sm sm:text-base text-yellow-800 leading-relaxed">
-                        <strong>Informasi:</strong> Pihak <strong>PT Imah Teuweul Indonesia</strong> berhak mengubah 
-                        nilai poin atau jenis hadiah sewaktu-waktu dengan pemberitahuan terlebih dahulu.
-                    </p>
+                    {/* Informasi kebijakan poin & hadiah */}
+                    <div className="mt-10 p-4 sm:p-5 bg-yellow-50 border border-yellow-200 rounded-xl">
+                        <p className="text-sm sm:text-base text-yellow-800 leading-relaxed">
+                            <strong>Informasi:</strong> Pihak <strong>PT Imah Teuweul Indonesia</strong> berhak mengubah 
+                            nilai poin atau jenis hadiah sewaktu-waktu dengan pemberitahuan terlebih dahulu.
+                        </p>
+                    </div>
                 </div>
             </div>
 
