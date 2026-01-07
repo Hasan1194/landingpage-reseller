@@ -26,7 +26,7 @@ function Dashboard() {
         <div className="max-w-7xl mx-auto flex justify-between items-center px-6 md:px-16 py-4">
           <a href="/">
             <img
-              src="/icon.png"
+              src="/icon.svg"
               alt="PT Imah Teuweul Indonesia"
               className="h-12 w-auto hover:opacity-90 transition"
             />
@@ -136,25 +136,25 @@ function Dashboard() {
               name: "Madu Mellifera",
               desc: "Madu yang berasal dari lebah Apis mellifera dan memiliki karakteristik rasa yang lebih manis dengan tekstur yang relative cair. Madu Mellifera menjadi salah satu produk produk yang cocok dikonsumsi sehari-hari dan banyak diminati",
               shortDesc: "Madu yang berasal dari lebah Apis mellifera dengan rasa manis dan tekstur cair, cocok untuk konsumsi sehari-hari.",
-              image: "/mm.jpg" 
+              image: "/mm.webp" 
             },
             {
               name: "Madu Odeng",
               desc: "Madu Odeng merupakan madu khas yang berasal dari lebah hutan dan memiliki cita rasa lebih kuat serta aroma khas. Produk ini banyak dicari karena dipercaya memiliki manfaat yang baik dalam meningkatkan stamina dan kesehatan tubuh",
               shortDesc: "Madu khas dari lebah hutan dengan cita rasa kuat, baik untuk meningkatkan stamina dan kesehatan tubuh.",
-              image: "/mo.jpg"
+              image: "/mo.webp"
             },
             {
               name: "Madu Teuweul",
               desc: "Madu Teuweul merupakan produk yang digunakan sebagai identitas perusahaan, disamping identitas perusahaan madu teuweul memiliki keunikan tersendiri karena dihasilkan dari lebah lokal dan memiliki proses fermentasi alami yang memberikan rasa dan aroma yang berbeda dari madu yang lainnya. Produk madu teuweul merupakan produk unggulan yang dimiliki oleh PT Imah Teuweul Indonesia karena manfaat yang dimiliki madu ini lebih banyak dibandingkan dengan madu yang lainnya.",
               shortDesc: "Produk unggulan dengan fermentasi alami dari lebah lokal, memiliki manfaat lebih banyak dibanding madu lainnya.",
-              image: "/mt.jpg"
+              image: "/mt.webp"
             },
             {
               name: "Madu Habbatussauda",
               desc: "Madu Habbatussauda yang ada pada PT Imah Teuweul merupakan hasil kombinasi antara madu murni dengan habbatussauda (jintan hitam), yang diketahui memiliki khasiat dalam meningkatkan sistem kekebalan tubuh, memperbaiki metabolisme, serta mendukung kesehatan secara menyeluruh.",
               shortDesc: "Kombinasi madu murni dengan habbatussauda untuk meningkatkan sistem kekebalan tubuh dan metabolisme.",
-              image: "/mh.jpg"
+              image: "/mh.webp"
             },
           ].map((product, i) => (
             <div

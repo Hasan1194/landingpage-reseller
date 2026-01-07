@@ -62,7 +62,7 @@ function Login() {
         {/* Left Image */}
         <div className="hidden md:flex w-1/2 bg-[#C9A24A] items-center justify-center p-6">
           <img 
-            src="/logo.png"
+            src="/logo.svg"
             alt="Ilustrasi Madu"
             className="rounded-xl shadow-lg border-2 border-[#C9A24A]/50"
           />
