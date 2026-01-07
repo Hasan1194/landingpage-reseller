@@ -2,11 +2,13 @@ import React, { useEffect, useState } from "react";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import { useAuth } from "../context/AuthContext";
+import { Plus } from "lucide-react";
 
 import Navbar from "./components/Navbar";
 import HeroPoints from "./components/HeroPoints";
 import StatsGrid from "./components/StatsGrid";
 import PointHistoryModal from "./components/PointHistoryModal";
+import PointRequestModal from "./components/PointRequestModal";
 import RewardCatalog from "./components/RewardCatalog";
 import Footer from "./components/Footer";
 
@@ -25,6 +27,7 @@ export default function ResellerPage() {
 
     const [pointHistory, setPointHistory] = useState([]);
     const [showHistoryModal, setShowHistoryModal] = useState(false);
+    const [showRequestModal, setShowRequestModal] = useState(false);
     const [historyType, setHistoryType] = useState(null);
 
     const totalEarnedPoints = pointHistory
@@ -44,6 +47,14 @@ export default function ResellerPage() {
     const closeHistoryModal = () => {
         setShowHistoryModal(false);
         setHistoryType(null);
+    };
+
+    const openRequestModal = () => {
+        setShowRequestModal(true);
+    };
+
+    const closeRequestModal = () => {
+        setShowRequestModal(false);
     };
 
     useEffect(() => {
@@ -147,12 +158,26 @@ export default function ResellerPage() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-100 via-[#C9A24A]/10 to-white">
             <Navbar user={userData} totalPoints={totalPoints} />
+            
+            {/* Floating Request Button */}
+            <button
+                onClick={openRequestModal}
+                className="fixed bottom-8 right-8 z-40 bg-gradient-to-r from-[#C9A24A] to-[#B8933D] text-white p-4 rounded-full shadow-2xl hover:shadow-[0_10px_40px_rgba(201,162,74,0.5)] hover:scale-110 active:scale-95 transition-all duration-300 flex items-center gap-2 group"
+                title="Request Tambah Poin"
+            >
+                <Plus className="w-6 h-6" />
+                <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 whitespace-nowrap font-semibold">
+                    Request Poin
+                </span>
+            </button>
+
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-6 space-y-8">
                 <div className="hidden md:block fixed top-20 right-10 w-72 h-72 bg-[#C9A24A]/30 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
                 <div
                     className="hidden md:block fixed bottom-20 left-10 w-96 h-96 bg-[#C9A24A]/40 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"
                     style={{ animationDelay: "2s" }}
                 ></div>
+                
                 <HeroPoints
                     totalPoints={totalPoints}
                     totalEarnedPoints={totalEarnedPoints}
@@ -179,6 +204,13 @@ export default function ResellerPage() {
                         type={historyType}
                         data={pointHistory}
                         onClose={closeHistoryModal}
+                    />
+                )}
+
+                {showRequestModal && (
+                    <PointRequestModal
+                        currentUser={currentUser}
+                        onClose={closeRequestModal}
                     />
                 )}
             </main>
