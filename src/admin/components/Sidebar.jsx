@@ -38,6 +38,17 @@ export default function Sidebar({ activePage, setActivePage }) {
                     >
                         <Gift size={20} /> Kelola Reward
                     </button>
+
+                    <button
+                        onClick={() => setActivePage("approval")}
+                        className={`flex items-center gap-3 p-3 w-full rounded-lg font-medium ${
+                            activePage === "approval"
+                                ? "bg-yellow-400 text-white"
+                                : "hover:bg-yellow-100"
+                        }`}
+                    >
+                        <Users size={20} /> Approval Poin
+                    </button>
                 </nav>
             </div>
 
