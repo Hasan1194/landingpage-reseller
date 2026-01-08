@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Edit, Save, X, Download } from "lucide-react";
 import { motion } from "framer-motion";
 import { db } from "../../firebase/firebaseConfig";
-import { collection, getDocs, doc, updateDoc, addDoc, serverTimestamp, increment } from "firebase/firestore";
+import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 
@@ -15,6 +15,7 @@ export default function ResellerManagement() {
     const [sortOrder, setSortOrder] = useState("desc");
     const [modalType, setModalType] = useState(null);
     const [isExporting, setIsExporting] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
 
     const exportAllResellersToPDF = async () => {
         setIsExporting(true);
@@ -128,13 +129,13 @@ export default function ResellerManagement() {
                     valign: 'middle'
                 },
                 columnStyles: {
-                    0: { halign: 'center', cellWidth: 12 }, // No
-                    1: { halign: 'left', cellWidth: 40 },   // Nama
-                    2: { halign: 'left', cellWidth: 50 },   // Email
-                    3: { halign: 'center', cellWidth: 35 }, // No Telepon
-                    4: { halign: 'left', cellWidth: 65 },   // Alamat
-                    5: { halign: 'right', cellWidth: 30 },  // Total Poin
-                    6: { halign: 'center', cellWidth: 20 }  // Hadiah
+                    0: { halign: 'center', cellWidth: 12 },
+                    1: { halign: 'left', cellWidth: 40 },
+                    2: { halign: 'left', cellWidth: 50 },
+                    3: { halign: 'center', cellWidth: 35 },
+                    4: { halign: 'left', cellWidth: 65 },
+                    5: { halign: 'right', cellWidth: 30 },
+                    6: { halign: 'center', cellWidth: 20 }
                 },
                 alternateRowStyles: {
                     fillColor: [249, 250, 251]
@@ -188,14 +189,6 @@ export default function ResellerManagement() {
             setIsExporting(false);
         }
     };
-
-    const calculateTotalPoint = (pointHistory = []) => {
-        return pointHistory.reduce((total, item) => {
-            if (item.type === 'IN') return total + item.amount
-            if (item.type === 'OUT') return total - item.amount
-            return total
-        }, 0)
-    }
 
     const formatTimestamp = (timestamp) => {
         if (!timestamp) return "-";
@@ -269,11 +262,11 @@ export default function ResellerManagement() {
                     halign: 'center'
                 },
                 columnStyles: {
-                    0: { halign: 'center', cellWidth: 15 }, // No
-                    1: { halign: 'right', cellWidth: 25 },  // Jumlah
-                    2: { halign: 'center', cellWidth: 30 }, // Tipe
-                    3: { halign: 'left', cellWidth: 70 },   // Deskripsi
-                    4: { halign: 'center', cellWidth: 30 }  // Tanggal
+                    0: { halign: 'center', cellWidth: 15 },
+                    1: { halign: 'right', cellWidth: 25 },
+                    2: { halign: 'center', cellWidth: 30 },
+                    3: { halign: 'left', cellWidth: 70 },
+                    4: { halign: 'center', cellWidth: 30 }
                 },
                 alternateRowStyles: {
                     fillColor: [245, 245, 245]
@@ -329,8 +322,8 @@ export default function ResellerManagement() {
         const snapshot = await getDocs(historyRef);
 
         const history = snapshot.docs.map((d) => ({
-        id: d.id,
-        ...d.data()
+            id: d.id,
+            ...d.data()
         }));
 
         setHistoryList(history);
@@ -338,15 +331,15 @@ export default function ResellerManagement() {
 
     const filteredHistory = historyList
         .filter((item) => {
-        if (!filterMonth) return true;
-        const date = item.timestamp?.toDate();
-        const month = date?.getMonth() + 1;
-        return month == filterMonth;
+            if (!filterMonth) return true;
+            const date = item.timestamp?.toDate();
+            const month = date?.getMonth() + 1;
+            return month == filterMonth;
         })
         .sort((a, b) => 
-        sortOrder === "desc" 
-            ? b.amount - a.amount 
-            : a.amount - b.amount
+            sortOrder === "desc" 
+                ? b.amount - a.amount 
+                : a.amount - b.amount
         );
 
     const fetchResellers = async () => {
@@ -354,11 +347,11 @@ export default function ResellerManagement() {
         const snapshot = await getDocs(usersRef);
 
         const data = snapshot.docs
-        .filter((d) => d.data().role === "resellers")
-        .map((d) => ({
-            id: d.id,
-            ...d.data()
-        }));
+            .filter((d) => d.data().role === "resellers")
+            .map((d) => ({
+                id: d.id,
+                ...d.data()
+            }));
 
         setResellers(data);
     };
@@ -371,9 +364,9 @@ export default function ResellerManagement() {
         setSelectedUser(user);
         setModalType('edit');
         setEditData({
-        points: user.points,
-        prize: user.prize,
-        description: ""
+            name: user.name || "",
+            phonenumber: user.phonenumber || "",
+            address: user.address || ""
         });
     };
 
@@ -385,258 +378,300 @@ export default function ResellerManagement() {
         setFilterMonth("");
     };
 
-    const handleSavePoints = async () => {
-        const user = selectedUser;
-        if (!user) return;
+    const handleSaveUserData = async () => {
+        if (!selectedUser) return;
 
-        const diff = Number(editData.points) - Number(user.points);
-        if (diff === 0) {
-        closeModal();
-        return;
+        // Validasi input
+        if (!editData.name || !editData.phonenumber || !editData.address) {
+            alert('Semua field harus diisi!');
+            return;
         }
 
+        // Validasi nomor telepon (hanya angka)
+        if (!/^\d+$/.test(editData.phonenumber)) {
+            alert('Nomor telepon hanya boleh berisi angka!');
+            return;
+        }
+
+        setIsSaving(true);
+
         try {
-        const userRef = doc(db, "users", user.id);
+            const userRef = doc(db, "users", selectedUser.id);
 
-        await updateDoc(userRef, {
-            points: increment(diff),
-            prize: editData.prize || user.prize || "-"
-        });
+            await updateDoc(userRef, {
+                name: editData.name.trim(),
+                phonenumber: editData.phonenumber.trim(),
+                address: editData.address.trim()
+            });
 
-        const historyRef = collection(db, "users", user.id, "pointHistory");
-        await addDoc(historyRef, {
-            amount: diff,
-            type: diff > 0 ? "earn" : "redeem",
-            description: editData.description || "Perubahan poin oleh admin",
-            timestamp: serverTimestamp()
-        });
-
-        console.log("Poin berhasil diperbarui dan history dicatat!");
-
-        closeModal();
-        fetchResellers();
+            alert('Data reseller berhasil diperbarui!');
+            closeModal();
+            fetchResellers();
 
         } catch (err) {
-        console.error("Gagal update poin:", err);
+            console.error("Gagal update data user:", err);
+            alert('Gagal memperbarui data. Silakan coba lagi.');
+        } finally {
+            setIsSaving(false);
         }
     };
 
     return (
         <motion.div className="bg-white p-6 rounded-lg shadow-lg">
-        <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold">Kelola Akun Reseller</h2>
+            <div className="flex items-center justify-between mb-4">
+                <h2 className="text-2xl font-bold">Kelola Akun Reseller</h2>
 
-            <button
-                onClick={exportAllResellersToPDF}
-                disabled={isExporting}
-                className={`flex items-center gap-2 px-5 py-3 rounded-lg font-semibold transition-all shadow-lg ${
-                    isExporting
-                        ? 'bg-gray-400 cursor-not-allowed'
-                        : 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white hover:shadow-xl'
-                }`}
-            >
-                {isExporting ? (
-                    <>
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        Mengexport...
-                    </>
-                ) : (
-                    <>
-                        <Download size={20} />
-                        Print Data Reseller
-                    </>
-                )}
-            </button>
-        </div>
-
-        <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-            <thead>
-                <tr className="bg-gray-200 text-left">
-                <th className="p-3">Nama</th>
-                <th className="p-3">Email</th>
-                <th className="p-3">No Telepon</th>
-                <th className="p-3">Alamat</th>
-                <th className="p-3">Poin</th>
-                <th className="p-3">Hadiah</th>
-                <th className="p-3">Aksi</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                {resellers.map((user) => (
-                <tr key={user.id} className="border-b hover:bg-gray-50">
-                    <td 
-                    className="p-3 cursor-pointer text-blue-600 underline"
-                    onClick={() => openHistoryModal(user)}
-                    >
-                    {user.name}
-                    </td>
-                    <td className="p-3">{user.email}</td>
-                    <td className="p-3">+62{user.phonenumber}</td>
-                    <td className="p-3">{user.address}</td>
-                    <td className="p-3">{user.points}</td>
-                    <td className="p-3">{user.prize || "-"}</td>
-                    <td className="p-3">
-                    <button
-                        className="px-3 py-1 bg-blue-500 text-white rounded-lg text-sm flex items-center gap-1 hover:bg-blue-600"
-                        onClick={() => openEditModal(user)}
-                    >
-                        <Edit size={14} /> Edit Point
-                    </button>
-                    </td>
-                </tr>
-                ))}
-            </tbody>
-            </table>
-        </div>
-
-        {/* Modal Edit Points */}
-        {selectedUser && modalType === 'edit' && (
-            <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-            <motion.div 
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                className="bg-white p-6 rounded-xl shadow-xl w-full max-w-md"
-            >
-                <h3 className="text-xl font-semibold mb-4">Edit Poin Reseller</h3>
-
-                <label className="block mb-2 font-medium">Points</label>
-                <input
-                type="number"
-                className="w-full p-2 border rounded mb-3"
-                value={editData.points}
-                onChange={(e) => setEditData({ ...editData, points: e.target.value })}
-                />
-
-                <label className="block mb-2 font-medium">Prize</label>
-                <input
-                type="number"
-                className="w-full p-2 border rounded mb-3"
-                value={editData.prize}
-                onChange={(e) => setEditData({ ...editData, prize: e.target.value })}
-                />
-
-                <label className="block mb-2 font-medium">Deskripsi</label>
-                <input
-                type="text"
-                className="w-full p-2 border rounded mb-4"
-                placeholder="Alasan perubahan..."
-                value={editData.description}
-                onChange={(e) => setEditData({ ...editData, description: e.target.value })}
-                />
-
-                <div className="flex justify-end gap-2">
                 <button
-                    className="px-3 py-1 bg-gray-400 text-white rounded-lg flex items-center gap-1 hover:bg-gray-500"
-                    onClick={closeModal}
+                    onClick={exportAllResellersToPDF}
+                    disabled={isExporting}
+                    className={`flex items-center gap-2 px-5 py-3 rounded-lg font-semibold transition-all shadow-lg ${
+                        isExporting
+                            ? 'bg-gray-400 cursor-not-allowed'
+                            : 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white hover:shadow-xl'
+                    }`}
                 >
-                    <X size={16} /> Batal
+                    {isExporting ? (
+                        <>
+                            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            Mengexport...
+                        </>
+                    ) : (
+                        <>
+                            <Download size={20} />
+                            Print Data Reseller
+                        </>
+                    )}
                 </button>
-                <button
-                    className="px-3 py-1 bg-green-600 text-white rounded-lg flex items-center gap-1 hover:bg-green-700"
-                    onClick={handleSavePoints}
-                >
-                    <Save size={16} /> Simpan
-                </button>
-                </div>
-            </motion.div>
             </div>
-        )}
 
-        {/* Modal History */}
-        {selectedUser && modalType === 'history' && (
-            <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 overflow-auto z-50">
-            <motion.div 
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                className="bg-white p-6 rounded-xl w-full max-w-2xl"
-            >
-                <h3 className="text-xl font-semibold mb-4">
-                Riwayat Poin - {selectedUser.name}
-                </h3>
-
-                {/* Filter + Sort UI */}
-                <div className="flex gap-3 mb-4">
-                <select 
-                    className="border p-2 rounded"
-                    onChange={(e) => setFilterMonth(e.target.value)}
-                    value={filterMonth}
-                >
-                    <option value="">Semua Bulan</option>
-                    {[...Array(12).keys()].map(m => (
-                    <option key={m+1} value={m+1}>
-                        {new Date(2024, m).toLocaleDateString('id-ID', { month: 'long' })}
-                    </option>
-                    ))}
-                </select>
-
-                <select 
-                    className="border p-2 rounded"
-                    onChange={(e) => setSortOrder(e.target.value)}
-                    value={sortOrder}
-                >
-                    <option value="desc">Poin terbesar</option>
-                    <option value="asc">Poin terkecil</option>
-                </select>
-                </div>
-
-                {/* History List */}
-                <div className="overflow-x-auto">
-                <table className="w-full border">
-                    <thead className="bg-gray-200">
-                    <tr>
-                        <th className="p-2">Jumlah</th>
-                        <th className="p-2">Tipe</th>
-                        <th className="p-2">Deskripsi</th>
-                        <th className="p-2">Tanggal</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {filteredHistory.map((item) => (
-                        <tr key={item.id} className="border-b text-center">
-                        <td className="p-2">{item.amount}</td>
-                        <td className="p-2">{item.type}</td>
-                        <td className="p-2">{item.description}</td>
-                        <td className="p-2">{item.timestamp?.toDate().toLocaleDateString()}</td>
+            <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                    <thead>
+                        <tr className="bg-gray-200 text-left">
+                            <th className="p-3">Nama</th>
+                            <th className="p-3">Email</th>
+                            <th className="p-3">No Telepon</th>
+                            <th className="p-3">Alamat</th>
+                            <th className="p-3">Poin</th>
+                            <th className="p-3">Hadiah</th>
+                            <th className="p-3">Aksi</th>
                         </tr>
-                    ))}
+                    </thead>
+
+                    <tbody>
+                        {resellers.map((user) => (
+                            <tr key={user.id} className="border-b hover:bg-gray-50">
+                                <td 
+                                    className="p-3 cursor-pointer text-blue-600 underline"
+                                    onClick={() => openHistoryModal(user)}
+                                >
+                                    {user.name}
+                                </td>
+                                <td className="p-3">{user.email}</td>
+                                <td className="p-3">+62{user.phonenumber}</td>
+                                <td className="p-3">{user.address}</td>
+                                <td className="p-3">{user.points}</td>
+                                <td className="p-3">{user.prize || "-"}</td>
+                                <td className="p-3">
+                                    <button
+                                        className="px-3 py-1 bg-blue-500 text-white rounded-lg text-sm flex items-center gap-1 hover:bg-blue-600"
+                                        onClick={() => openEditModal(user)}
+                                    >
+                                        <Edit size={14} /> Edit Data
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
                     </tbody>
                 </table>
-                </div>
-
-                <div className="flex justify-end gap-3 mt-6">
-                    <button
-                        onClick={exportToPDF}
-                        disabled={isExporting || filteredHistory.length === 0}
-                        className={`flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
-                            isExporting || filteredHistory.length === 0
-                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                : 'bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 shadow-lg hover:shadow-xl'
-                        }`}
-                    >
-                        {isExporting ? (
-                            <>
-                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                Mengexport...
-                            </>
-                        ) : (
-                            <>
-                                <Download className="w-5 h-5" />
-                                Export ke PDF
-                            </>
-                        )}
-                    </button>
-                    <button 
-                        className="px-6 py-3 bg-gray-500 text-white rounded-lg font-semibold hover:bg-gray-600 transition-colors" 
-                        onClick={closeModal}
-                    >
-                        Tutup
-                    </button>
-                </div>
-            </motion.div>
             </div>
-        )}
+
+            {/* Modal Edit User Data */}
+            {selectedUser && modalType === 'edit' && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+                    <motion.div 
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        className="bg-white p-6 rounded-xl shadow-xl w-full max-w-md"
+                    >
+                        <h3 className="text-xl font-semibold mb-4">Edit Data Reseller</h3>
+                        
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block mb-2 font-medium text-gray-700">
+                                    Nama Lengkap <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition-colors"
+                                    placeholder="Masukkan nama lengkap"
+                                    value={editData.name}
+                                    onChange={(e) => setEditData({ ...editData, name: e.target.value })}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block mb-2 font-medium text-gray-700">
+                                    No Telepon <span className="text-red-500">*</span>
+                                </label>
+                                <div className="flex">
+                                    <span className="inline-flex items-center px-3 bg-gray-100 border border-r-0 border-gray-300 rounded-l-lg text-gray-600 font-medium">
+                                        +62
+                                    </span>
+                                    <input
+                                        type="text"
+                                        className="w-full p-3 border-2 border-gray-300 rounded-r-lg focus:border-blue-500 focus:outline-none transition-colors"
+                                        placeholder="8123456789"
+                                        value={editData.phonenumber}
+                                        onChange={(e) => {
+                                            const value = e.target.value.replace(/\D/g, '');
+                                            setEditData({ ...editData, phonenumber: value });
+                                        }}
+                                    />
+                                </div>
+                                <p className="text-xs text-gray-500 mt-1">Format: 8123456789 (tanpa +62)</p>
+                            </div>
+
+                            <div>
+                                <label className="block mb-2 font-medium text-gray-700">
+                                    Alamat Lengkap <span className="text-red-500">*</span>
+                                </label>
+                                <textarea
+                                    className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition-colors resize-none"
+                                    placeholder="Masukkan alamat lengkap"
+                                    rows="3"
+                                    value={editData.address}
+                                    onChange={(e) => setEditData({ ...editData, address: e.target.value })}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex justify-end gap-2 mt-6">
+                            <button
+                                className="px-4 py-2 bg-gray-400 text-white rounded-lg flex items-center gap-2 hover:bg-gray-500 transition-colors"
+                                onClick={closeModal}
+                                disabled={isSaving}
+                            >
+                                <X size={16} /> Batal
+                            </button>
+                            <button
+                                className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-colors ${
+                                    isSaving 
+                                        ? 'bg-gray-400 cursor-not-allowed' 
+                                        : 'bg-green-600 hover:bg-green-700'
+                                } text-white`}
+                                onClick={handleSaveUserData}
+                                disabled={isSaving}
+                            >
+                                {isSaving ? (
+                                    <>
+                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        Menyimpan...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Save size={16} /> Simpan
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
+
+            {/* Modal History */}
+            {selectedUser && modalType === 'history' && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 overflow-auto z-50">
+                    <motion.div 
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        className="bg-white p-6 rounded-xl w-full max-w-2xl"
+                    >
+                        <h3 className="text-xl font-semibold mb-4">
+                            Riwayat Poin - {selectedUser.name}
+                        </h3>
+
+                        {/* Filter + Sort UI */}
+                        <div className="flex gap-3 mb-4">
+                            <select 
+                                className="border p-2 rounded"
+                                onChange={(e) => setFilterMonth(e.target.value)}
+                                value={filterMonth}
+                            >
+                                <option value="">Semua Bulan</option>
+                                {[...Array(12).keys()].map(m => (
+                                    <option key={m+1} value={m+1}>
+                                        {new Date(2024, m).toLocaleDateString('id-ID', { month: 'long' })}
+                                    </option>
+                                ))}
+                            </select>
+
+                            <select 
+                                className="border p-2 rounded"
+                                onChange={(e) => setSortOrder(e.target.value)}
+                                value={sortOrder}
+                            >
+                                <option value="desc">Poin terbesar</option>
+                                <option value="asc">Poin terkecil</option>
+                            </select>
+                        </div>
+
+                        {/* History List */}
+                        <div className="overflow-x-auto">
+                            <table className="w-full border">
+                                <thead className="bg-gray-200">
+                                    <tr>
+                                        <th className="p-2">Jumlah</th>
+                                        <th className="p-2">Tipe</th>
+                                        <th className="p-2">Deskripsi</th>
+                                        <th className="p-2">Tanggal</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filteredHistory.map((item) => (
+                                        <tr key={item.id} className="border-b text-center">
+                                            <td className="p-2">{item.amount}</td>
+                                            <td className="p-2">{item.type}</td>
+                                            <td className="p-2">{item.description}</td>
+                                            <td className="p-2">{item.timestamp?.toDate().toLocaleDateString()}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div className="flex justify-end gap-3 mt-6">
+                            <button
+                                onClick={exportToPDF}
+                                disabled={isExporting || filteredHistory.length === 0}
+                                className={`flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
+                                    isExporting || filteredHistory.length === 0
+                                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                        : 'bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 shadow-lg hover:shadow-xl'
+                                }`}
+                            >
+                                {isExporting ? (
+                                    <>
+                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        Mengexport...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Download className="w-5 h-5" />
+                                        Export ke PDF
+                                    </>
+                                )}
+                            </button>
+                            <button 
+                                className="px-6 py-3 bg-gray-500 text-white rounded-lg font-semibold hover:bg-gray-600 transition-colors" 
+                                onClick={closeModal}
+                            >
+                                Tutup
+                            </button>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
         </motion.div>
     );
 }
