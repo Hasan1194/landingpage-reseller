@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { Upload, X, Send, Loader2, CheckCircle, Image } from "lucide-react";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { db, storage } from "../../firebase/firebaseConfig";
+import { supabase } from "../../supabase/supabaseClient";
 
 // Fungsi untuk compress dan convert gambar ke WebP
 const compressImageToWebP = (file) => {
@@ -111,44 +110,48 @@ const compressImageToWebP = (file) => {
         setLoading(true);
 
         try {
-        // Compress gambar ke WebP
+        // 1. Compress ke WebP
         const compressedBlob = await compressImageToWebP(selectedImage);
-        
-        // Upload ke Firebase Storage
-        const timestamp = Date.now();
-        const fileName = `point-requests/${currentUser.uid}/${timestamp}.webp`;
-        const storageRef = ref(storage, fileName);
-        
-        await uploadBytes(storageRef, compressedBlob, {
-            contentType: 'image/webp'
+
+        // 2. Upload ke Supabase Storage
+        const filePath = `point-requests/${currentUser.uid}/${Date.now()}.webp`;
+
+        const { error: uploadError } = await supabase.storage
+        .from("bukti-transfer")
+        .upload(filePath, compressedBlob, {
+            contentType: "image/webp",
+            upsert: false,
         });
-        
-        // Get download URL
-        const imageUrl = await getDownloadURL(storageRef);
-        
-        // Simpan request ke Firestore
+
+        if (uploadError) throw uploadError;
+
+        // 3. Ambil public URL
+        const { data } = supabase.storage
+        .from("bukti-transfer")
+        .getPublicUrl(filePath);
+
+        const imageUrl = data.publicUrl;
+
+        // 4. Simpan metadata ke Firestore
         await addDoc(collection(db, "pointRequests"), {
-            userId: currentUser.uid,
-            pointAmount: parseInt(pointAmount),
-            description: description,
-            imageUrl: imageUrl,
-            status: "pending", // pending, approved, rejected
-            createdAt: serverTimestamp(),
+        userId: currentUser.uid,
+        pointAmount: parseInt(pointAmount),
+        description,
+        imageUrl,        // URL Supabase
+        imagePath: filePath, // optional
+        status: "pending",
+        createdAt: serverTimestamp(),
         });
 
         setSuccess(true);
-        
-        // Auto close setelah 2 detik
-        setTimeout(() => {
-            onClose();
-        }, 2000);
+        setTimeout(onClose, 2000);
 
-        } catch (error) {
-        console.error("Error submitting request:", error);
-        alert('Gagal mengirim request. Silakan coba lagi.');
-        } finally {
+    } catch (error) {
+        console.error("Submit error:", error);
+        alert("Gagal mengirim request");
+    } finally {
         setLoading(false);
-        }
+    }
     };
 
     if (success) {
