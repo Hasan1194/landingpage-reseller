@@ -49,6 +49,17 @@ export default function Sidebar({ activePage, setActivePage }) {
                     >
                         <Users size={20} /> Approval Poin
                     </button>
+
+                    <button
+                        onClick={() => setActivePage("rewardApproval")}
+                        className={`flex items-center gap-3 p-3 w-full rounded-lg font-medium ${
+                            activePage === "rewardApproval"
+                                ? "bg-yellow-400 text-white"
+                                : "hover:bg-yellow-100"
+                        }`}
+                    >
+                        <Gift size={20} /> Approval Reward
+                    </button>
                 </nav>
             </div>
 

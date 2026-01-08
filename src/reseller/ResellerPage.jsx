@@ -197,6 +197,8 @@ export default function ResellerPage() {
                     rewards={rewards}
                     loading={loadingRewards}
                     totalPoints={totalPoints}
+                    userData={userData}
+                    currentUser={currentUser}
                 />
 
                 {showHistoryModal && (

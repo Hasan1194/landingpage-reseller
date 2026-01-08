@@ -3,6 +3,7 @@ import Sidebar from "./components/Sidebar";
 import ResellerManagement from "./components/ResellerManagement";
 import RewardManagement from "./components/RewardManagement";
 import PointApprovalManagement from "./components/PointApprovalManagement";
+import RewardApprovalManagement from "./components/RewardApprovalManagement";
 
 export default function AdminPage() {
     const [activePage, setActivePage] = useState("approval");
@@ -15,6 +16,7 @@ export default function AdminPage() {
                 {activePage === "approval" && <PointApprovalManagement />}
                 {activePage === "reseller" && <ResellerManagement />}
                 {activePage === "reward" && <RewardManagement />}
+                {activePage === "rewardApproval" && <RewardApprovalManagement />}
             </div>
         </div>
     );
