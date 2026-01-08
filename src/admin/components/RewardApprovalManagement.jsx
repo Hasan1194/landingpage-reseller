@@ -47,19 +47,16 @@ export default function RewardApprovalManagement() {
         try {
             const userRef = doc(db, "users", request.userId);
             
-            // Update status request
             await updateDoc(doc(db, "rewardRequests", request.id), {
                 status: "approved",
                 approvedAt: serverTimestamp()
             });
 
-            // Kurangi poin user dan tambah prize count
             await updateDoc(userRef, {
                 points: increment(-request.rewardPoints),
                 prize: increment(1)
             });
 
-            // Tambahkan ke point history (redeem)
             await addDoc(collection(db, "users", request.userId, "pointHistory"), {
                 type: "redeem",
                 amount: request.rewardPoints,

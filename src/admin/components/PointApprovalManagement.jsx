@@ -29,7 +29,6 @@ export default function PointApprovalManagement() {
             const data = snap.docs
                 .map((d) => ({ id: d.id, ...d.data() }))
                 .sort((a, b) => {
-                    // Sort: pending first, then by createdAt desc
                     if (a.status === 'pending' && b.status !== 'pending') return -1;
                     if (a.status !== 'pending' && b.status === 'pending') return 1;
                     return (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0);
@@ -37,7 +36,6 @@ export default function PointApprovalManagement() {
 
             setRequests(data);
 
-            // Fetch user details for each request
             const userIds = [...new Set(data.map(r => r.userId))];
             const details = {};
             
@@ -67,18 +65,15 @@ export default function PointApprovalManagement() {
         setProcessingId(req.id);
 
         try {
-            // 1. Update status request
             await updateDoc(doc(db, "pointRequests", req.id), {
                 status: "approved",
                 approvedAt: serverTimestamp(),
             });
 
-            // 2. Update user points
             await updateDoc(doc(db, "users", req.userId), {
                 points: increment(req.pointAmount),
             });
 
-            // 3. Add to point history
             await addDoc(
                 collection(db, "users", req.userId, "pointHistory"),
                 {
@@ -101,7 +96,7 @@ export default function PointApprovalManagement() {
 
     const handleReject = async (req) => {
         const reason = prompt('Alasan reject (opsional):');
-        if (reason === null) return; // User cancelled
+        if (reason === null) return; 
 
         setProcessingId(req.id);
 
@@ -185,7 +180,6 @@ export default function PointApprovalManagement() {
                 </button>
             </div>
 
-            {/* Pending Requests */}
             {pendingRequests.length > 0 && (
                 <div className="space-y-4">
                     <h2 className="text-xl font-semibold text-gray-900">Pending Requests</h2>
@@ -230,7 +224,6 @@ export default function PointApprovalManagement() {
                                     <p className="text-gray-900">{req.description}</p>
                                 </div>
 
-                                {/* Image Preview */}
                                 <div className="space-y-2">
                                     <div className="flex items-center justify-between">
                                         <p className="text-sm font-semibold text-gray-700">Bukti Transfer:</p>
@@ -260,7 +253,6 @@ export default function PointApprovalManagement() {
                                     <p className="text-xs text-gray-500">Path: {req.imagePath}</p>
                                 </div>
 
-                                {/* Action Buttons */}
                                 <div className="flex gap-4 pt-2">
                                     <button
                                         onClick={() => handleApprove(req)}
@@ -310,7 +302,6 @@ export default function PointApprovalManagement() {
                 </div>
             )}
 
-            {/* Processed Requests */}
             {processedRequests.length > 0 && (
                 <div className="space-y-4 mt-8">
                     <h2 className="text-xl font-semibold text-gray-900">Riwayat Processed</h2>

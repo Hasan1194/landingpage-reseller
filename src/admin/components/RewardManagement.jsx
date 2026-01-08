@@ -43,7 +43,6 @@ export default function RewardManagement() {
         setIsModalOpen(true);
     };
 
-    // CREATE & UPDATE
     const handleSubmit = async () => {
         if (!form.name || !form.points) return;
 
@@ -63,7 +62,6 @@ export default function RewardManagement() {
         setIsModalOpen(false);
     };
 
-    // DELETE
     const deleteReward = async (id) => {
         await deleteDoc(doc(db, "rewards", id));
     };
@@ -111,7 +109,6 @@ export default function RewardManagement() {
             </tbody>
         </table>
 
-        {/* Modal Form */}
         {isModalOpen && (
             <motion.div
             initial={{ scale: 0.8 }}

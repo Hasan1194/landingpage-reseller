@@ -4,7 +4,6 @@ import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { supabase } from "../../supabase/supabaseClient";
 import { db } from "../../firebase/firebaseConfig";
 
-// Fungsi untuk compress dan convert gambar ke WebP
 const compressImageToWebP = (file) => {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -16,7 +15,6 @@ const compressImageToWebP = (file) => {
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
                 
-                // Hitung ukuran baru (maksimal 800px untuk sisi terpanjang)
                 let width = img.width;
                 let height = img.height;
                 const maxSize = 800;
@@ -32,10 +30,8 @@ const compressImageToWebP = (file) => {
                 canvas.width = width;
                 canvas.height = height;
                 
-                // Draw image ke canvas
                 ctx.drawImage(img, 0, 0, width, height);
                 
-                // Convert ke WebP dengan quality 30
                 canvas.toBlob(
                     (blob) => {
                         if (blob) {
@@ -45,7 +41,7 @@ const compressImageToWebP = (file) => {
                         }
                     },
                     'image/webp',
-                    0.3 // Quality 30%
+                    0.3
                 );
             };
             
@@ -70,13 +66,11 @@ export default function PointRequestModal({ currentUser, onClose }) {
         const file = e.target.files[0];
         if (!file) return;
 
-        // Validasi tipe file
         if (!file.type.startsWith('image/')) {
             alert('File harus berupa gambar!');
             return;
         }
 
-        // Validasi ukuran file (max 10MB untuk file asli)
         if (file.size > 10 * 1024 * 1024) {
             alert('Ukuran file maksimal 10MB!');
             return;
@@ -84,7 +78,6 @@ export default function PointRequestModal({ currentUser, onClose }) {
 
         setSelectedImage(file);
         
-        // Buat preview
         const reader = new FileReader();
         reader.onloadend = () => {
             setImagePreview(reader.result);
@@ -111,12 +104,10 @@ export default function PointRequestModal({ currentUser, onClose }) {
         setLoading(true);
 
         try {
-            // 1. Compress ke WebP
             console.log('Compressing image...');
             const compressedBlob = await compressImageToWebP(selectedImage);
             console.log('Compressed size:', compressedBlob.size);
 
-            // 2. Generate unique filename dengan timestamp
             const timestamp = Date.now();
             const randomStr = Math.random().toString(36).substring(7);
             const fileName = `${currentUser.uid}_${timestamp}_${randomStr}.webp`;
@@ -124,7 +115,6 @@ export default function PointRequestModal({ currentUser, onClose }) {
 
             console.log('Uploading to Supabase:', filePath);
 
-            // 3. Upload ke Supabase Storage
             const { data: uploadData, error: uploadError } = await supabase.storage
                 .from("bukti-transfer")
                 .upload(filePath, compressedBlob, {
@@ -140,7 +130,6 @@ export default function PointRequestModal({ currentUser, onClose }) {
 
             console.log('Upload success:', uploadData);
 
-            // 4. Ambil public URL dengan cara yang benar
             const { data: urlData } = supabase.storage
                 .from("bukti-transfer")
                 .getPublicUrl(filePath);
@@ -149,12 +138,10 @@ export default function PointRequestModal({ currentUser, onClose }) {
             
             console.log('Public URL:', imageUrl);
 
-            // Validasi URL
             if (!imageUrl || imageUrl.includes('undefined')) {
                 throw new Error('Invalid image URL generated');
             }
 
-            // 5. Simpan metadata ke Firestore
             await addDoc(collection(db, "pointRequests"), {
                 userId: currentUser.uid,
                 pointAmount: parseInt(pointAmount),
@@ -169,7 +156,6 @@ export default function PointRequestModal({ currentUser, onClose }) {
 
             setSuccess(true);
             
-            // Auto close setelah 2 detik
             setTimeout(() => {
                 onClose();
             }, 2000);
@@ -177,7 +163,6 @@ export default function PointRequestModal({ currentUser, onClose }) {
         } catch (error) {
             console.error("Submit error:", error);
             
-            // Error message yang lebih spesifik
             let errorMessage = 'Gagal mengirim request. ';
             if (error.message) {
                 errorMessage += error.message;
