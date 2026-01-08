@@ -1,9 +1,18 @@
-import { Award, Gift, Lock, Send, Loader2, CheckCircle } from "lucide-react";
+import { Award, Gift, Lock, Send, Loader2, CheckCircle, Clock, XCircle, AlertCircle } from "lucide-react";
 import { useState } from "react";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../../firebase/firebaseConfig";
 
-export default function RewardCatalog({ rewards, loading, totalPoints, userData, currentUser }) {
+export default function RewardCatalog({ 
+    rewards, 
+    loading, 
+    totalPoints, 
+    userData, 
+    currentUser, 
+    hasPendingRequest,
+    userRewardRequests,
+    onRequestSubmitted 
+}) {
     const [submitting, setSubmitting] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
@@ -11,6 +20,11 @@ export default function RewardCatalog({ rewards, loading, totalPoints, userData,
     const handleRedeemReward = async (reward) => {
         if (!currentUser) {
             alert('Anda harus login terlebih dahulu!');
+            return;
+        }
+
+        if (hasPendingRequest) {
+            alert('Anda masih memiliki request penukaran yang sedang diproses. Mohon tunggu hingga request sebelumnya selesai direview oleh admin.');
             return;
         }
 
@@ -28,7 +42,6 @@ export default function RewardCatalog({ rewards, loading, totalPoints, userData,
         setSubmitting(true);
 
         try {
-            // Simpan reward request ke Firestore
             await addDoc(collection(db, "rewardRequests"), {
                 userId: currentUser.uid,
                 userName: userData?.name || userData?.email || "User",
@@ -44,7 +57,11 @@ export default function RewardCatalog({ rewards, loading, totalPoints, userData,
             setSuccessMessage(`Request penukaran "${reward.name}" berhasil dikirim!`);
             setShowSuccess(true);
             
-            // Auto close success message after 3 seconds
+            // Refresh user reward requests
+            if (onRequestSubmitted) {
+                await onRequestSubmitted();
+            }
+            
             setTimeout(() => {
                 setShowSuccess(false);
             }, 3000);
@@ -75,9 +92,35 @@ export default function RewardCatalog({ rewards, loading, totalPoints, userData,
         );
     }
 
+    const getStatusIcon = (status) => {
+        switch (status) {
+            case "pending": return Clock;
+            case "approved": return CheckCircle;
+            case "rejected": return XCircle;
+            default: return AlertCircle;
+        }
+    };
+
+    const getStatusColor = (status) => {
+        switch (status) {
+            case "pending": return "text-yellow-600 bg-yellow-50 border-yellow-200";
+            case "approved": return "text-green-600 bg-green-50 border-green-200";
+            case "rejected": return "text-red-600 bg-red-50 border-red-200";
+            default: return "text-gray-600 bg-gray-50 border-gray-200";
+        }
+    };
+
+    const getStatusText = (status) => {
+        switch (status) {
+            case "pending": return "Menunggu Review";
+            case "approved": return "Disetujui";
+            case "rejected": return "Ditolak";
+            default: return status;
+        }
+    };
+
     return (
         <>
-            {/* Success Modal */}
             {showSuccess && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                     <div className="bg-white rounded-2xl p-8 max-w-md w-full text-center animate-scale-in">
@@ -104,17 +147,84 @@ export default function RewardCatalog({ rewards, loading, totalPoints, userData,
                     </div>
                 </div>
 
-                {/* Informasi kebijakan poin & hadiah */}
-                <div className="mt-10 p-4 sm:p-5 bg-yellow-50 border border-yellow-200 rounded-xl">
-                    <p className="text-sm sm:text-base text-yellow-800 leading-relaxed">
+                {/* Status Request User */}
+                {userRewardRequests && userRewardRequests.length > 0 && (
+                    <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 border-2 border-[#C9A24A]/20">
+                        <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                            <AlertCircle className="w-5 h-5 text-[#C9A24A]" />
+                            Status Request Penukaran Anda
+                        </h3>
+                        <div className="space-y-3 max-h-64 overflow-y-auto">
+                            {userRewardRequests.map(req => {
+                                const StatusIcon = getStatusIcon(req.status);
+                                return (
+                                    <div 
+                                        key={req.id}
+                                        className={`p-4 rounded-xl border-2 ${getStatusColor(req.status)} transition-all`}
+                                    >
+                                        <div className="flex items-start justify-between gap-3 mb-2">
+                                            <div className="flex-1">
+                                                <h4 className="font-bold text-gray-900 mb-1">{req.rewardName}</h4>
+                                                <p className="text-sm text-gray-600">
+                                                    {req.rewardPoints?.toLocaleString('id-ID')} poin
+                                                </p>
+                                            </div>
+                                            <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(req.status)}`}>
+                                                <StatusIcon className="w-3.5 h-3.5" />
+                                                {getStatusText(req.status)}
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-xs text-gray-500">
+                                            <Clock className="w-3.5 h-3.5" />
+                                            {req.createdAt?.toLocaleDateString('id-ID', {
+                                                day: 'numeric',
+                                                month: 'short',
+                                                year: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            })}
+                                        </div>
+                                        {req.status === "rejected" && req.rejectionReason && (
+                                            <div className="mt-2 pt-2 border-t border-red-200">
+                                                <p className="text-xs text-red-700">
+                                                    <strong>Alasan:</strong> {req.rejectionReason}
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
+
+                {/* Warning jika ada pending request */}
+                {hasPendingRequest && (
+                    <div className="bg-yellow-50 border-2 border-yellow-300 rounded-xl p-4 flex items-start gap-3">
+                        <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+                        <div>
+                            <p className="text-sm font-semibold text-yellow-800 mb-1">
+                                Penukaran Ditangguhkan
+                            </p>
+                            <p className="text-sm text-yellow-700">
+                                Anda memiliki request penukaran yang sedang diproses. Mohon tunggu hingga admin mereview request Anda sebelum melakukan penukaran baru.
+                            </p>
+                        </div>
+                    </div>
+                )}
+
+                {/* Informasi kebijakan */}
+                <div className="p-4 sm:p-5 bg-blue-50 border border-blue-200 rounded-xl">
+                    <p className="text-sm sm:text-base text-blue-800 leading-relaxed">
                         <strong>Informasi:</strong> Pihak <strong>PT Imah Teuweul Indonesia</strong> berhak mengubah 
                         nilai poin atau jenis hadiah sewaktu-waktu dengan pemberitahuan terlebih dahulu.
                     </p>
                 </div>
 
+                {/* Katalog Hadiah */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
                     {rewards.map(r => {
-                        const canClaim = totalPoints >= r.points;
+                        const canClaim = totalPoints >= r.points && !hasPendingRequest;
                         const pointsNeeded = r.points - totalPoints;
                         
                         return (
@@ -126,10 +236,15 @@ export default function RewardCatalog({ rewards, loading, totalPoints, userData,
                                         : 'border border-gray-200 hover:-translate-y-1'
                                 }`}
                             >
-                                {/* Badge "Tersedia" untuk reward yang bisa diklaim */}
                                 {canClaim && (
                                     <div className="absolute top-3 right-3 z-10 bg-gradient-to-r from-[#C9A24A] to-[#B8933D] text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
                                         Tersedia
+                                    </div>
+                                )}
+
+                                {hasPendingRequest && totalPoints >= r.points && (
+                                    <div className="absolute top-3 right-3 z-10 bg-yellow-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+                                        Pending Request
                                     </div>
                                 )}
 
@@ -138,9 +253,14 @@ export default function RewardCatalog({ rewards, loading, totalPoints, userData,
                                         ? 'from-[#C9A24A]/20 to-[#B8933D]/20' 
                                         : 'from-gray-100 to-gray-200'
                                 } flex items-center justify-center relative overflow-hidden`}>
-                                    {!canClaim && (
+                                    {!canClaim && totalPoints < r.points && (
                                         <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px] flex items-center justify-center">
                                             <Lock className="w-12 h-12 text-gray-400" />
+                                        </div>
+                                    )}
+                                    {hasPendingRequest && totalPoints >= r.points && (
+                                        <div className="absolute inset-0 bg-yellow-500/10 backdrop-blur-[1px] flex items-center justify-center">
+                                            <Clock className="w-12 h-12 text-yellow-600" />
                                         </div>
                                     )}
                                     <Gift className={`w-16 h-16 sm:w-20 sm:h-20 ${
@@ -173,7 +293,7 @@ export default function RewardCatalog({ rewards, loading, totalPoints, userData,
                                             </div>
                                         </div>
 
-                                        {!canClaim && pointsNeeded > 0 && (
+                                        {!canClaim && pointsNeeded > 0 && !hasPendingRequest && (
                                             <div className="mb-3">
                                                 <div className="flex justify-between text-xs text-gray-500 mb-1">
                                                     <span>Progress</span>
@@ -205,6 +325,11 @@ export default function RewardCatalog({ rewards, loading, totalPoints, userData,
                                             <>
                                                 <Loader2 className="w-4 h-4 animate-spin" />
                                                 <span>Mengirim...</span>
+                                            </>
+                                        ) : hasPendingRequest && totalPoints >= r.points ? (
+                                            <>
+                                                <Clock className="w-4 h-4" />
+                                                <span>Request Pending</span>
                                             </>
                                         ) : canClaim ? (
                                             <>

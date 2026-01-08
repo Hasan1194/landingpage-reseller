@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, getDocs, query, where, orderBy, limit } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import { useAuth } from "../context/AuthContext";
 import { Plus } from "lucide-react";
@@ -30,6 +30,10 @@ export default function ResellerPage() {
     const [showRequestModal, setShowRequestModal] = useState(false);
     const [historyType, setHistoryType] = useState(null);
 
+    // State untuk reward requests user
+    const [userRewardRequests, setUserRewardRequests] = useState([]);
+    const [loadingRequests, setLoadingRequests] = useState(true);
+
     const totalEarnedPoints = pointHistory
         .filter(h => h.type === "earn")
         .reduce((sum, h) => sum + (h.amount || 0), 0);
@@ -38,6 +42,9 @@ export default function ResellerPage() {
     const targetPoints = nextReward ? nextReward.points : (rewards.length > 0 ? rewards[rewards.length - 1].points : 500);
     
     const progress = targetPoints > 0 ? (totalPoints / targetPoints) * 100 : 0;
+
+    // Check apakah user punya pending request
+    const hasPendingRequest = userRewardRequests.some(req => req.status === "pending");
 
     const openHistoryModal = (type) => {
         setHistoryType(type);
@@ -55,6 +62,35 @@ export default function ResellerPage() {
 
     const closeRequestModal = () => {
         setShowRequestModal(false);
+    };
+
+    const fetchUserRewardRequests = async () => {
+        if (!currentUser) {
+            setLoadingRequests(false);
+            return;
+        }
+
+        try {
+            const q = query(
+                collection(db, "rewardRequests"),
+                where("userId", "==", currentUser.uid),
+                orderBy("createdAt", "desc"),
+                limit(10)
+            );
+
+            const snapshot = await getDocs(q);
+            const data = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data(),
+                createdAt: doc.data().createdAt?.toDate()
+            }));
+
+            setUserRewardRequests(data);
+        } catch (error) {
+            console.error("Error fetching user reward requests:", error);
+        } finally {
+            setLoadingRequests(false);
+        }
     };
 
     useEffect(() => {
@@ -152,6 +188,7 @@ export default function ResellerPage() {
         };
 
         fetchMyPointHistory();
+        fetchUserRewardRequests();
 
     }, [ currentUser ]);
 
@@ -199,6 +236,9 @@ export default function ResellerPage() {
                     totalPoints={totalPoints}
                     userData={userData}
                     currentUser={currentUser}
+                    hasPendingRequest={hasPendingRequest}
+                    userRewardRequests={userRewardRequests}
+                    onRequestSubmitted={fetchUserRewardRequests}
                 />
 
                 {showHistoryModal && (
