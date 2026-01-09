@@ -26,6 +26,8 @@ function Dashboard() {
         <div className="max-w-7xl mx-auto flex justify-between items-center px-6 md:px-16 py-4">
           <a href="/">
             <img
+              rel="icon" 
+              type="image/svg+xml"
               src="/icon.svg"
               alt="PT Imah Teuweul Indonesia"
               className="h-12 w-auto hover:opacity-90 transition"
