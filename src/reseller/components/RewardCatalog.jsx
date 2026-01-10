@@ -57,7 +57,6 @@ export default function RewardCatalog({
             setSuccessMessage(`Request penukaran "${reward.name}" berhasil dikirim!`);
             setShowSuccess(true);
             
-            // Refresh user reward requests
             if (onRequestSubmitted) {
                 await onRequestSubmitted();
             }
@@ -147,7 +146,6 @@ export default function RewardCatalog({
                     </div>
                 </div>
 
-                {/* Status Request User */}
                 {userRewardRequests && userRewardRequests.length > 0 && (
                     <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 border-2 border-[#C9A24A]/20">
                         <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
@@ -198,7 +196,6 @@ export default function RewardCatalog({
                     </div>
                 )}
 
-                {/* Warning jika ada pending request */}
                 {hasPendingRequest && (
                     <div className="bg-yellow-50 border-2 border-yellow-300 rounded-xl p-4 flex items-start gap-3">
                         <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
@@ -213,7 +210,6 @@ export default function RewardCatalog({
                     </div>
                 )}
 
-                {/* Informasi kebijakan */}
                 <div className="p-4 sm:p-5 bg-blue-50 border border-blue-200 rounded-xl">
                     <p className="text-sm sm:text-base text-blue-800 leading-relaxed">
                         <strong>Informasi:</strong> Pihak <strong>PT Imah Teuweul Indonesia</strong> berhak mengubah 
@@ -221,7 +217,6 @@ export default function RewardCatalog({
                     </p>
                 </div>
 
-                {/* Katalog Hadiah */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
                     {rewards.map(r => {
                         const canClaim = totalPoints >= r.points && !hasPendingRequest;
