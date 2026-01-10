@@ -47,7 +47,7 @@ export default function Sidebar({ activePage, setActivePage }) {
                                 : "hover:bg-yellow-100"
                         }`}
                     >
-                        <Users size={20} /> Approval Poin
+                        <Users size={20} /> Permintaan Poin
                     </button>
 
                     <button
@@ -58,7 +58,7 @@ export default function Sidebar({ activePage, setActivePage }) {
                                 : "hover:bg-yellow-100"
                         }`}
                     >
-                        <Gift size={20} /> Approval Reward
+                        <Gift size={20} /> Permintaan Reward
                     </button>
                 </nav>
             </div>

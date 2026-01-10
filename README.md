@@ -20,3 +20,5 @@ If you are developing a production application, we recommend using TypeScript wi
 - npm install lucide-react
 - npm install firebase
 - npm install jspdf jspdf-autotable
+- npm install @supabase/supabase-js
+- npm install -g firebase-tools
