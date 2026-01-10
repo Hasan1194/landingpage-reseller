@@ -62,7 +62,6 @@ export default function Sidebar({ activePage, setActivePage }) {
                     </button>
                 </nav>
             </div>
-
             <button
                 onClick={handleLogout}
                 className="flex items-center gap-3 p-3 w-full rounded-lg font-medium text-red-600 hover:bg-red-100 mt-6"
