@@ -30,7 +30,6 @@ export default function ResellerPage() {
     const [showRequestModal, setShowRequestModal] = useState(false);
     const [historyType, setHistoryType] = useState(null);
 
-    // State untuk reward requests user
     const [userRewardRequests, setUserRewardRequests] = useState([]);
     const [loadingRequests, setLoadingRequests] = useState(true);
 
@@ -43,7 +42,6 @@ export default function ResellerPage() {
     
     const progress = targetPoints > 0 ? (totalPoints / targetPoints) * 100 : 0;
 
-    // Check apakah user punya pending request
     const hasPendingRequest = userRewardRequests.some(req => req.status === "pending");
 
     const openHistoryModal = (type) => {
@@ -196,7 +194,6 @@ export default function ResellerPage() {
         <div className="min-h-screen bg-gradient-to-br from-gray-100 via-[#C9A24A]/10 to-white">
             <Navbar user={userData} totalPoints={totalPoints} />
             
-            {/* Floating Request Button */}
             <button
                 onClick={openRequestModal}
                 className="fixed bottom-8 right-8 z-40 bg-gradient-to-r from-[#C9A24A] to-[#B8933D] text-white p-4 rounded-full shadow-2xl hover:shadow-[0_10px_40px_rgba(201,162,74,0.5)] hover:scale-110 active:scale-95 transition-all duration-300 flex items-center gap-2 group"

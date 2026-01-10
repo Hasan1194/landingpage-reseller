@@ -32,7 +32,9 @@ export default function Navbar({ user, totalPoints }) {
                     <div className="flex items-center">
                         <div>
                             <img
-                                src="/icon.png"
+                                rel="icon" 
+                                type="image/svg+xml"
+                                src="/icon.svg"
                                 alt="PT Imah Teuweul Indonesia"
                                 className="h-8 sm:h-10 md:h-12 w-auto hover:opacity-90 transition"
                             />
